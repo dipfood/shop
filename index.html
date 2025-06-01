@@ -1,0 +1,352 @@
+<!DOCTYPE html><html><head><base href="/">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PortalNh Pro - Cardápio Digital</title>
+    <style>
+      :root {
+        --primary: #ff6b6b;
+        --secondary: #4ecdc4;
+        --dark: #2d3436;
+        --light: #f9f9f9;
+      }
+    
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Poppins', sans-serif;
+      }
+    
+      body {
+        background: var(--light);
+        color: var(--dark);
+      }
+    
+      .hero {
+        background: linear-gradient(45deg, var(--primary), var(--secondary));
+        min-height: 80vh;
+        padding: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+      }
+    
+      .hero-content {
+        text-align: center;
+        color: white;
+        z-index: 1;
+        max-width: 800px;
+      }
+    
+      .hero h1 {
+        font-size: 3.5rem;
+        margin-bottom: 1rem;
+        animation: fadeIn 1s ease-in;
+      }
+    
+      .hero p {
+        font-size: 1.2rem;
+        margin-bottom: 2rem;
+      }
+    
+      .btn {
+        padding: 1rem 2rem;
+        border: none;
+        border-radius: 50px;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+      }
+    
+      .btn-primary {
+        background: white;
+        color: var(--primary);
+      }
+    
+      .btn-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+      }
+    
+      .features, .why-buy {
+        padding: 5rem 2rem;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+    
+      .features {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+      }
+    
+      .feature-card {
+        background: white;
+        padding: 2rem;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        text-align: center;
+        transition: transform 0.3s ease;
+      }
+    
+      .feature-card:hover {
+        transform: translateY(-10px);
+      }
+    
+      .feature-icon {
+        width: 80px;
+        height: 80px;
+        margin-bottom: 1rem;
+      }
+    
+      .why-buy {
+        text-align: center;
+        background: white;
+        padding: 5rem 2rem;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      }
+    
+      .why-buy h2 {
+        color: var(--primary);
+        margin-bottom: 2rem;
+        font-size: 2.5rem;
+      }
+    
+      .benefits-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2rem;
+        margin-top: 3rem;
+      }
+    
+      .benefit-item {
+        padding: 1.5rem;
+        background: var(--light);
+        border-radius: 10px;
+        transition: transform 0.3s ease;
+      }
+    
+      .benefit-item:hover {
+        transform: translateY(-5px);
+      }
+    
+      .benefit-item h4 {
+        color: var(--primary);
+        margin-bottom: 1rem;
+      }
+    
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+    
+      .pricing {
+        padding: 5rem 2rem;
+        background: var(--light);
+        text-align: center;
+      }
+    
+      .pricing-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        max-width: 1200px;
+        margin: 2rem auto;
+      }
+    
+      .price-card {
+        background: white;
+        padding: 2rem;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      }
+    
+      .price-card.featured {
+        border: 3px solid var(--primary);
+        transform: scale(1.05);
+      }
+    
+      .price {
+        font-size: 2.5rem;
+        color: var(--primary);
+        margin: 1rem 0;
+      }
+    
+      @media (max-width: 768px) {
+        .hero h1 {
+          font-size: 2.5rem;
+        }
+      }
+    </style>
+   <script>
+        // Função para bloquear o uso do Ctrl + U e outras teclas de desenvolvedor
+        document.addEventListener('keydown', function(event) {
+            // Bloquear Ctrl + U (visualizar código-fonte)
+            if (event.ctrlKey && event.key === 'u') {
+                event.preventDefault(); // Impede a ação padrão (abrir o código-fonte)
+                alert('Acesso ao código-fonte bloqueado!');
+            }
+
+            // Bloquear F12 (ferramentas de desenvolvedor)
+            if (event.key === 'F12') {
+                event.preventDefault(); // Impede a ação padrão
+                alert('Ferramentas de desenvolvedor bloqueadas!');
+            }
+
+            // Bloquear botão direito do mouse (para prevenir "Inspecionar" e "Ver código-fonte")
+            if (event.button === 2) {
+                event.preventDefault(); // Impede a ação padrão
+                alert('Clique direito desabilitado!');
+            }
+        });
+
+        // Impedir o uso da tecla F12 com evento 'contextmenu' (botão direito)
+        document.addEventListener('contextmenu', function(event) {
+            event.preventDefault(); // Impede o menu de contexto (botão direito)
+            alert('Clique direito desabilitado!');
+        });
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&amp;display=swap" rel="stylesheet">
+    </head>
+    <body>
+    
+    <section class="hero">
+      <div class="hero-content">
+        <h1>PortalNh Pro</h1>
+        <p>Transforme seu cardápio em uma experiência digital incrível. Aumente suas vendas e encante seus clientes.</p>
+        <a href="https://freitaslost.github.io/demonstrarsistema/" class="btn btn-primary" target="_blank">Demonstrativo</a>
+      </div>
+    </section>
+    
+    <section class="why-buy">
+      <h2>Por que Assinar?</h2>
+      <p>O cardápio digital é o futuro da sua operação gastronômica. Descubra como ele pode revolucionar seu negócio:</p>
+      
+      <div class="benefits-grid">
+        <div class="benefit-item">
+          <h4>Economia Real</h4>
+          <p>Economize até 70% em custos de impressão e atualizações de cardápio físico. Sem mais gastos recorrentes com reimpressões.</p>
+        </div>
+        
+        <div class="benefit-item">
+          <h4>Aumento nas Vendas</h4>
+          <p>Cardápios digitais aumentam em média 30% o ticket médio através de fotos atrativas e sugestões personalizadas.</p>
+        </div>
+        
+        <div class="benefit-item">
+          <h4>Gestão Eficiente</h4>
+          <p>Atualize preços e itens instantaneamente, gerencie múltiplas unidades e analise dados de consumo em tempo real.</p>
+        </div>
+        
+        <div class="benefit-item">
+          <h4>Experiência Superior</h4>
+          <p>Ofereça uma experiência moderna e higiênica aos seus clientes, com fotos, descrições detalhadas e informações nutricionais.</p>
+        </div>
+      </div>
+    </section>
+    
+    <section class="features">
+      <div class="feature-card">
+        <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+        </svg>
+        <h3>Fácil Atualização</h3>
+        <p>Atualize seus preços e cardápio em tempo real, sem complicação</p>
+      </div>
+    
+      <div class="feature-card">
+        <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+        </svg>
+        <h3>100% Seguro</h3>
+        <p>Proteção de dados e backup automático de todas as informações</p>
+      </div>
+    
+      <div class="feature-card">
+        <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2">
+          <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+        </svg>
+        <h3>Analytics Avançado</h3>
+        <p>Acompanhe pedidos e preferências dos clientes com relatórios detalhados</p>
+      </div>
+    </section>
+    
+    <section class="pricing">
+      <h2>Planos e Preços</h2>
+      <div class="pricing-cards">
+        <div class="price-card">
+          <h3>Básico</h3>
+          <div class="price">R$19,97/mês</div>
+          <ul>
+            <li>Cardápio Digital</li>
+            <li>QR Code Personalizado</li>
+            <li>Cor e Logo Personalizada</li>
+            <li>Atualizações Semanais!</li>
+          </ul>
+          <a href="https://wa.me/5517992095122?text=Olá! Tenho interesse no plano Básico do PortalNh Pro por R$44,99/mês" class="btn btn-primary" target="_blank">Escolher Plano</a>
+        </div>
+    
+        <div class="price-card featured">
+          <h3>Premium</h3>
+          <div class="price">R$39,96/mês</div>
+          <ul>
+            <li>Tudo do Plano Básico</li>
+            <li>Suporte Prioritário</li>
+            <li>PDV Simples Fluxo de CAIXA</li>
+            <li>Até 2 Empresas</li>
+          </ul>
+          <a href="https://wa.me/5517992095122?text=Olá! Tenho interesse no plano Premium do PortalNh Pro por R$79,99/mês para até 2 empresas" class="btn btn-primary" target="_blank">Escolher Plano</a>
+        </div>
+    
+        <div class="price-card">
+          <h3>Enterprise</h3>
+          <div class="price">Sob Consulta</div>
+          <ul>
+            <li>Soluções Personalizadas</li>
+            <li>Suporte 24/7</li>
+            <li>Treinamento da Equipe</li>
+          </ul>
+          <a href="https://wa.me/5517992095122?text=Olá! Gostaria de saber mais sobre o plano Enterprise do PortalNh Pro" class="btn btn-primary" target="_blank">Falar com Consultor</a>
+        </div>
+      </div>
+    </section>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Animate features on scroll
+        const features = document.querySelectorAll('.feature-card, .benefit-item');
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = 1;
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        });
+    
+        features.forEach(feature => {
+            feature.style.opacity = 0;
+            feature.style.transform = 'translateY(20px)';
+            feature.style.transition = 'all 0.6s ease-out';
+            observer.observe(feature);
+        });
+    
+        // Add smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    });
+    </script>
+    
+    </body></html>
