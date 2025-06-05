@@ -70,7 +70,7 @@
             transform: scale(0.95);
         }
         
-        /* Sidebar Styles - Corrigidos */
+        /* Mobile Menu Sidebar Styles */
         .mobile-menu-slide {
             transform: translateX(-100%);
             transition: transform 0.3s ease;
@@ -82,15 +82,27 @@
             transform: translateX(0);
         }
         
-        .cart-slide {
-            transform: translateX(100%);
-            transition: transform 0.3s ease;
-            background-color: #ffffff;
-            border-left: 1px solid #e5e7eb;
+        /* Cart Modal Styles */
+        .cart-modal {
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+            background-color: rgba(0, 0, 0, 0.5);
         }
 
-        .cart-slide.open {
-            transform: translateX(0);
+        .cart-modal.open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .cart-modal-content {
+            transform: scale(0.9) translateY(20px);
+            transition: all 0.3s ease;
+        }
+
+        .cart-modal.open .cart-modal-content {
+            transform: scale(1) translateY(0);
         }
         
         /* Overlay Styles */
@@ -190,42 +202,46 @@
                 </div>
             </div>
         </div>
-        
-        <!-- Cart Sidebar -->
-        <div id="cart-overlay" class="fixed inset-0 z-40 hidden modal-overlay"></div>
-        <div id="cart-sidebar" class="fixed top-0 right-0 h-full w-80 z-50 cart-slide shadow-2xl">
-            <div class="p-6 h-full flex flex-col bg-white">
-                <div class="flex items-center justify-between mb-6">
-                    <h2 class="text-xl font-bold instagram-text-gradient">🛒 Seu Carrinho</h2>
-                    <button id="close-cart" class="touch-target flex items-center justify-center text-gray-700">
-                        <i data-lucide="x" class="w-6 h-6"></i>
-                    </button>
-                </div>
-                
-                <div id="cart-items" class="flex-1 overflow-y-auto space-y-4">
+    </header>
+
+    <!-- Cart Modal -->
+    <div id="cart-modal" class="fixed inset-0 z-50 cart-modal flex items-center justify-center p-4">
+        <div class="cart-modal-content bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[80vh] flex flex-col">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between p-6 border-b border-gray-200">
+                <h2 class="text-xl font-bold instagram-text-gradient">🛒 Seu Carrinho</h2>
+                <button id="close-cart" class="touch-target flex items-center justify-center text-gray-700 hover:bg-gray-100 rounded-full">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            
+            <!-- Modal Content -->
+            <div class="flex-1 overflow-hidden flex flex-col">
+                <div id="cart-items" class="flex-1 overflow-y-auto p-6 space-y-4">
                     <!-- Cart items will be inserted here -->
                 </div>
                 
-                <div id="cart-empty" class="flex-1 flex items-center justify-center text-center">
+                <div id="cart-empty" class="flex-1 flex items-center justify-center text-center p-6">
                     <div>
                         <i data-lucide="shopping-cart" class="w-16 h-16 text-gray-300 mx-auto mb-4"></i>
                         <p class="text-gray-500 text-lg">Seu carrinho está vazio</p>
                         <p class="text-gray-400">Adicione alguns brigadeiros deliciosos!</p>
                     </div>
                 </div>
-                
-                <div id="cart-footer" class="border-t pt-4 hidden bg-white">
-                    <div class="flex justify-between items-center mb-4">
-                        <span class="text-lg font-bold">Total:</span>
-                        <span id="cart-total" class="text-2xl font-bold instagram-text-gradient">R$ 0,00</span>
-                    </div>
-                    <button id="checkout-btn" class="btn-instagram text-white font-bold py-3 px-6 rounded-xl w-full">
-                        🎯 Finalizar Pedido
-                    </button>
+            </div>
+            
+            <!-- Modal Footer -->
+            <div id="cart-footer" class="border-t border-gray-200 p-6 bg-gray-50 rounded-b-2xl hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <span class="text-lg font-bold">Total:</span>
+                    <span id="cart-total" class="text-2xl font-bold instagram-text-gradient">R$ 0,00</span>
                 </div>
+                <button id="checkout-btn" class="btn-instagram text-white font-bold py-3 px-6 rounded-xl w-full">
+                    🎯 Finalizar Pedido
+                </button>
             </div>
         </div>
-    </header>
+    </div>
 
     <!-- Hero Section -->
     <section id="inicio" class="py-12 px-4 bg-white">
@@ -534,10 +550,9 @@
         const mobileMenuOverlay = document.getElementById('mobile-menu-overlay');
         const closeMenuBtn = document.getElementById('close-menu');
         
-        // Cart functionality
+        // Cart modal functionality
         const cartBtn = document.getElementById('cart-btn');
-        const cartSidebar = document.getElementById('cart-sidebar');
-        const cartOverlay = document.getElementById('cart-overlay');
+        const cartModal = document.getElementById('cart-modal');
         const closeCartBtn = document.getElementById('close-cart');
         
         function openMenu() {
@@ -553,14 +568,12 @@
         }
         
         function openCart() {
-            cartSidebar.classList.add('open');
-            cartOverlay.classList.remove('hidden');
+            cartModal.classList.add('open');
             document.body.style.overflow = 'hidden';
         }
         
         function closeCart() {
-            cartSidebar.classList.remove('open');
-            cartOverlay.classList.add('hidden');
+            cartModal.classList.remove('open');
             document.body.style.overflow = '';
         }
         
@@ -571,7 +584,13 @@
         
         cartBtn.addEventListener('click', openCart);
         closeCartBtn.addEventListener('click', closeCart);
-        cartOverlay.addEventListener('click', closeCart);
+        
+        // Close cart when clicking outside the modal content
+        cartModal.addEventListener('click', function(e) {
+            if (e.target === cartModal) {
+                closeCart();
+            }
+        });
         
         // Quantity functions
         function changeQuantity(product, change) {
@@ -642,7 +661,7 @@
                     <div class="bg-gray-50 rounded-xl p-4">
                         <div class="flex justify-between items-start mb-2">
                             <h4 class="font-bold text-gray-900">${item.name}</h4>
-                            <button onclick="removeFromCart('${item.id}')" class="text-red-500 hover:text-red-700">
+                            <button onclick="removeFromCart('${item.id}')" class="text-red-500 hover:text-red-700 p-1 hover:bg-red-50 rounded">
                                 <i data-lucide="trash-2" class="w-4 h-4"></i>
                             </button>
                         </div>
@@ -745,6 +764,14 @@
             }
             
             lastScrollY = currentScrollY;
+        });
+        
+        // Close modals with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeCart();
+                closeMenu();
+            }
         });
     </script>
 </body>
