@@ -70,18 +70,6 @@
             transform: scale(0.95);
         }
         
-        /* Mobile Menu Sidebar Styles */
-        .mobile-menu-slide {
-            transform: translateX(-100%);
-            transition: transform 0.3s ease;
-            background-color: #ffffff;
-            border-right: 1px solid #e5e7eb;
-        }
-        
-        .mobile-menu-slide.open {
-            transform: translateX(0);
-        }
-        
         /* Cart Modal Styles */
         .cart-modal {
             opacity: 0;
@@ -164,25 +152,26 @@
                 </div>
             </div>
         </nav>
-        
-        <!-- Mobile Menu Overlay -->
-        <div id="mobile-menu-overlay" class="fixed inset-0 z-40 hidden modal-overlay"></div>
-        
-        <!-- Mobile Menu Sidebar -->
-        <div id="mobile-menu" class="fixed top-0 left-0 h-full w-80 z-50 mobile-menu-slide shadow-2xl">
-            <div class="p-6 bg-white h-full">
-                <div class="flex items-center justify-between mb-8">
-                    <div class="flex items-center space-x-2">
-                        <div class="w-10 h-10 instagram-gradient rounded-full flex items-center justify-center">
-                            <i data-lucide="heart" class="w-5 h-5 text-white"></i>
-                        </div>
-                        <h2 class="text-xl font-bold instagram-text-gradient">Menu</h2>
+    </header>
+
+    <!-- Menu Modal -->
+    <div id="menu-modal" class="fixed inset-0 z-50 cart-modal flex items-center justify-center p-4">
+        <div class="cart-modal-content bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] flex flex-col">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between p-6 border-b border-gray-200">
+                <div class="flex items-center space-x-2">
+                    <div class="w-10 h-10 instagram-gradient rounded-full flex items-center justify-center">
+                        <i data-lucide="heart" class="w-5 h-5 text-white"></i>
                     </div>
-                    <button id="close-menu" class="touch-target flex items-center justify-center text-gray-700">
-                        <i data-lucide="x" class="w-6 h-6"></i>
-                    </button>
+                    <h2 class="text-xl font-bold instagram-text-gradient">Menu</h2>
                 </div>
-                
+                <button id="close-menu" class="touch-target flex items-center justify-center text-gray-700 hover:bg-gray-100 rounded-full">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            
+            <!-- Modal Content -->
+            <div class="flex-1 overflow-y-auto p-6">
                 <nav class="space-y-4">
                     <a href="#inicio" class="block py-3 px-4 text-lg font-semibold text-gray-700 hover:bg-gray-100 rounded-xl transition-colors">🏠 Início</a>
                     <a href="#produtos" class="block py-3 px-4 text-lg font-semibold text-gray-700 hover:bg-gray-100 rounded-xl transition-colors">🍫 Produtos</a>
@@ -202,7 +191,7 @@
                 </div>
             </div>
         </div>
-    </header>
+    </div>
 
     <!-- Cart Modal -->
     <div id="cart-modal" class="fixed inset-0 z-50 cart-modal flex items-center justify-center p-4">
@@ -544,28 +533,25 @@
             caixas: 0
         };
         
-        // Mobile menu functionality
+        // Menu modal functionality
         const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-        const mobileMenu = document.getElementById('mobile-menu');
-        const mobileMenuOverlay = document.getElementById('mobile-menu-overlay');
+        const menuModal = document.getElementById('menu-modal');
         const closeMenuBtn = document.getElementById('close-menu');
+
+        function openMenu() {
+            menuModal.classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeMenu() {
+            menuModal.classList.remove('open');
+            document.body.style.overflow = '';
+        }
         
         // Cart modal functionality
         const cartBtn = document.getElementById('cart-btn');
         const cartModal = document.getElementById('cart-modal');
         const closeCartBtn = document.getElementById('close-cart');
-        
-        function openMenu() {
-            mobileMenu.classList.add('open');
-            mobileMenuOverlay.classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-        }
-        
-        function closeMenu() {
-            mobileMenu.classList.remove('open');
-            mobileMenuOverlay.classList.add('hidden');
-            document.body.style.overflow = '';
-        }
         
         function openCart() {
             cartModal.classList.add('open');
@@ -580,10 +566,16 @@
         // Event listeners
         mobileMenuBtn.addEventListener('click', openMenu);
         closeMenuBtn.addEventListener('click', closeMenu);
-        mobileMenuOverlay.addEventListener('click', closeMenu);
         
         cartBtn.addEventListener('click', openCart);
         closeCartBtn.addEventListener('click', closeCart);
+        
+        // Close menu when clicking outside the modal content
+        menuModal.addEventListener('click', function(e) {
+            if (e.target === menuModal) {
+                closeMenu();
+            }
+        });
         
         // Close cart when clicking outside the modal content
         cartModal.addEventListener('click', function(e) {
