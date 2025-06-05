@@ -70,10 +70,11 @@
             transform: scale(0.95);
         }
         
+        /* Sidebar Styles - Corrigidos */
         .mobile-menu-slide {
             transform: translateX(-100%);
             transition: transform 0.3s ease;
-            background-color: #ffffff !important;
+            background-color: #ffffff;
             border-right: 1px solid #e5e7eb;
         }
         
@@ -84,12 +85,18 @@
         .cart-slide {
             transform: translateX(100%);
             transition: transform 0.3s ease;
-            background-color: #ffffff !important;
+            background-color: #ffffff;
             border-left: 1px solid #e5e7eb;
         }
 
         .cart-slide.open {
             transform: translateX(0);
+        }
+        
+        /* Overlay Styles */
+        .modal-overlay {
+            backdrop-filter: blur(5px);
+            background-color: rgba(0, 0, 0, 0.5);
         }
         
         .touch-target {
@@ -117,40 +124,6 @@
             0%, 20%, 60%, 100% { transform: translateY(0); }
             40% { transform: translateY(-10px); }
             80% { transform: translateY(-5px); }
-        }
-        
-        .modal-overlay {
-            backdrop-filter: blur(5px);
-            background-color: rgba(0, 0, 0, 0.5) !important;
-        }
-
-        /* Correções específicas para os sidebars */
-        #mobile-menu {
-            background-color: #ffffff !important;
-            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
-        }
-
-        #cart-sidebar {
-            background-color: #ffffff !important;
-            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
-        }
-
-        #cart-sidebar * {
-            background-color: inherit;
-        }
-
-        #cart-sidebar .bg-white {
-            background-color: #ffffff !important;
-        }
-
-        #cart-sidebar > div {
-            background-color: #ffffff !important;
-        }
-
-        /* Garantir que os overlays tenham fundo escuro */
-        #mobile-menu-overlay,
-        #cart-overlay {
-            background-color: rgba(0, 0, 0, 0.5) !important;
         }
     </style>
 </head>
@@ -181,10 +154,10 @@
         </nav>
         
         <!-- Mobile Menu Overlay -->
-        <div id="mobile-menu-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden modal-overlay"></div>
+        <div id="mobile-menu-overlay" class="fixed inset-0 z-40 hidden modal-overlay"></div>
         
         <!-- Mobile Menu Sidebar -->
-        <div id="mobile-menu" class="fixed top-0 left-0 h-full w-80 bg-white z-50 mobile-menu-slide shadow-2xl">
+        <div id="mobile-menu" class="fixed top-0 left-0 h-full w-80 z-50 mobile-menu-slide shadow-2xl">
             <div class="p-6 bg-white h-full">
                 <div class="flex items-center justify-between mb-8">
                     <div class="flex items-center space-x-2">
@@ -219,21 +192,21 @@
         </div>
         
         <!-- Cart Sidebar -->
-        <div id="cart-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden modal-overlay"></div>
-        <div id="cart-sidebar" class="fixed top-0 right-0 h-full w-80 z-50 cart-slide shadow-2xl" style="background-color: #ffffff !important;">
-            <div class="p-6 h-full flex flex-col" style="background-color: #ffffff !important;">
-                <div class="flex items-center justify-between mb-6" style="background-color: #ffffff !important;">
+        <div id="cart-overlay" class="fixed inset-0 z-40 hidden modal-overlay"></div>
+        <div id="cart-sidebar" class="fixed top-0 right-0 h-full w-80 z-50 cart-slide shadow-2xl">
+            <div class="p-6 h-full flex flex-col bg-white">
+                <div class="flex items-center justify-between mb-6">
                     <h2 class="text-xl font-bold instagram-text-gradient">🛒 Seu Carrinho</h2>
                     <button id="close-cart" class="touch-target flex items-center justify-center text-gray-700">
                         <i data-lucide="x" class="w-6 h-6"></i>
                     </button>
                 </div>
                 
-                <div id="cart-items" class="flex-1 overflow-y-auto space-y-4" style="background-color: #ffffff !important;">
+                <div id="cart-items" class="flex-1 overflow-y-auto space-y-4">
                     <!-- Cart items will be inserted here -->
                 </div>
                 
-                <div id="cart-empty" class="flex-1 flex items-center justify-center text-center" style="background-color: #ffffff !important;">
+                <div id="cart-empty" class="flex-1 flex items-center justify-center text-center">
                     <div>
                         <i data-lucide="shopping-cart" class="w-16 h-16 text-gray-300 mx-auto mb-4"></i>
                         <p class="text-gray-500 text-lg">Seu carrinho está vazio</p>
@@ -241,7 +214,7 @@
                     </div>
                 </div>
                 
-                <div id="cart-footer" class="border-t pt-4 hidden" style="background-color: #ffffff !important;">
+                <div id="cart-footer" class="border-t pt-4 hidden bg-white">
                     <div class="flex justify-between items-center mb-4">
                         <span class="text-lg font-bold">Total:</span>
                         <span id="cart-total" class="text-2xl font-bold instagram-text-gradient">R$ 0,00</span>
