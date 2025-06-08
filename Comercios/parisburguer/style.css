@@ -1,0 +1,371 @@
+
+:root {
+    --primary: #302c2c;
+    --secondary: #1a1a1a;
+    --botoesred: #f12d2d;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Arial', sans-serif;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    background-color: var(--secondary);
+    color: white;
+    padding-bottom: 120px;
+    position: relative;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    background: url('https://www.dropbox.co/scl/fi/o07qj7ohfirjcgyj67jgr/6.png?rlkey=fk7e201rqwdzd5f942ccazpwg&st=5rrkqo7u&dl=1') center/600px repeat;
+    opacity: 0.3;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    background-color: var(--primary);
+    padding: 15px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.header > div:first-child {
+    flex: 1;
+}
+
+.header h1 {
+    font-size: 1.5rem;
+    margin: 0;
+}
+
+.nav-buttons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px !important;
+    padding: 15px;
+    margin: 20px 0;
+    background: rgba(255, 0, 0, 0.05);
+    border-radius: 12px;
+}
+
+.nav-button {
+    width: 100%;
+    font-size: 13px;
+    padding: 12px 8px;
+    text-align: center;
+    background: rgba(255, 0, 0, 0.2);
+    border: none;
+    color: white;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    text-transform: uppercase;
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+.nav-button:hover {
+    background: var(--botoesred);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.nav-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.nav-button::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(rgba(255, 255, 255, 0.1), transparent);
+    pointer-events: none;
+}
+
+@media (max-width: 480px) {
+    .nav-buttons {
+        gap: 8px !important;
+        padding: 10px;
+    }
+
+    .nav-button {
+        font-size: 11px;
+        padding: 10px 4px;
+    }
+}
+
+.container {
+    padding: 10px;
+}
+
+.user-info {
+    margin-bottom: 15px;
+    padding: 15px;
+    background-color: rgba(255, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+.user-info input,
+#addressField input,
+#changeField input,
+#orderObservation {
+    width: 100%;
+    padding: 12px;
+    margin: 5px 0;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+#addressField,
+#pixField,
+#changeField {
+    display: none;
+    transition: all 0.3s ease;
+    background: rgba(255,255,255,0.1);
+    border-radius: 6px;
+    padding: 15px;
+}
+
+#addressField.show {
+    display: block;
+}
+
+.delivery-type,
+.payment-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin: 15px 0;
+    padding: 10px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 8px;
+}
+
+.delivery-type label,
+.payment-type label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 6px;
+    transition: background 0.3s ease;
+    min-width: 80px;
+    font-size: 14px;
+}
+
+.delivery-type label:hover,
+.payment-type label:hover {
+    background: rgba(255,255,255,0.2);
+}
+
+.menu-section {
+    margin: 15px 0;
+}
+
+.menu-section h2 {
+    font-size: 1.3rem;
+    margin-bottom: 10px;
+}
+
+.menu-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+}
+
+.menu-item {
+    background-color: rgba(255, 0, 0, 0.1);
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.menu-item h3 {
+    color: var(--botoesred);
+    margin-bottom: 8px;
+    font-size: 1.1rem;
+}
+
+.menu-item .price {
+    color: var(--botoesred);
+    font-weight: bold;
+    font-size: 1.1em;
+    margin: 8px 0;
+}
+
+.add-ons {
+    margin: 10px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.addon-option {
+    display: flex;
+    align-items: center;
+    gap: 1px;
+    padding: 1px 0;
+}
+
+.addon-option input[type="checkbox"] {
+    margin-right: 2px;
+}
+
+.cart-item-addons {
+    font-size: 0.8em;
+    color: rgba(255,255,255,0.8);
+    margin-top: 2px;
+}
+
+.add-to-cart {
+    background-color: var(--botoesred);
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+    font-size: 16px;
+}
+
+.cart {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--primary);
+    padding: 15px;
+    border-radius: 8px 8px 0 0;
+    max-height: 60vh;
+    overflow-y: auto;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.2);
+}
+
+.cart h2 {
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+}
+
+.cart-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 8px 0;
+    background: rgba(255,255,255,0.1);
+    padding: 8px;
+    border-radius: 4px;
+    flex-wrap: wrap;
+}
+
+.cart-item button {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#cart-total {
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin: 10px 0;
+}
+
+.checkout-btn {
+    background-color: white;
+    color: var(--primary);
+    border: none;
+    padding: 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 10px;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.store-status {
+    text-align: center;
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+button:disabled {
+    cursor: not-allowed !important;
+}
+
+@media (max-width: 480px) {
+    .nav-buttons {
+        gap: 5px !important;
+        padding: 0 5px;
+    }
+
+    .nav-button {
+        font-size: 11px;
+        padding: 6px 2px;
+    }
+
+    .cart {
+        padding: 10px;
+    }
+
+    .menu-item {
+        margin-bottom: 8px;
+    }
+
+    .cart-item {
+        font-size: 0.9rem;
+    }
+}
+
+.header .fa-phone {
+    color: white;
+    margin-right: 5px;
+}
+
+.observation-field {
+    margin: 15px 0;
+    padding: 15px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 8px;
+}
+
+.observation-field h3 {
+    margin-bottom: 10px;
+    font-size: 1.1em;
+    color: white;
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.status-box,
+.status-box.open,
+.status-box.closed {
+    display: none;
+}
