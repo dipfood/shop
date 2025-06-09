@@ -107,7 +107,7 @@ function selectCityForPlan(phone, cityName) {
   if (selectedPlan) {
     message = `Olá! tenho interesse no plano ${selectedPlan.name} por R$${selectedPlan.price}/mês. Gostaria de mais informações sobre a contratação.`
   } else {
-    message = `Olá! Sou de ${cityName} e gostaria de saber mais sobre os serviços da DipFood.`
+    message = `Olá! gostaria de saber mais sobre os serviços da DipFood.`
   }
 
   const encodedMessage = encodeURIComponent(message)
