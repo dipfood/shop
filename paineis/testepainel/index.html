@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Pedidos - Lanchonete</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .receipt-content {
+            font-family: 'Courier New', monospace;
+            width: 300px;
+            margin: 0 auto;
+            padding: 10px;
+            font-size: 12px;
+            line-height: 1.2;
+        }
+        .receipt-divider {
+            border-top: 1px dashed #000;
+            margin: 8px 0;
+        }
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            .receipt-content, .receipt-content * {
+                visibility: visible;
+            }
+            .receipt-content {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto p-4">
+        <h1 class="text-2xl font-bold mb-6">Sistema de Pedidos - Lanchonete</h1>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Formulário de pedido -->
+            <div class="space-y-6">
+                <!-- Adicionar Item -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-xl font-semibold mb-4">Adicionar Item</h2>
+                    
+                    <div class="space-y-4">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label for="itemName" class="block text-sm font-medium text-gray-700 mb-1">Nome do Item</label>
+                                <input 
+                                    type="text" 
+                                    id="itemName" 
+                                    placeholder="Ex: Misto Quente"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                >
+                            </div>
+                            <div>
+                                <label for="itemPrice" class="block text-sm font-medium text-gray-700 mb-1">Preço (R$)</label>
+                                <input 
+                                    type="number" 
+                                    id="itemPrice" 
+                                    min="0" 
+                                    step="0.01" 
+                                    placeholder="0.00"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                >
+                            </div>
+                        </div>
+
+                        <div class="border rounded-md p-4">
+                            <h3 class="font-medium mb-3">Adicionais</h3>
+                            
+                            <div class="grid grid-cols-3 gap-2 mb-3">
+                                <input 
+                                    type="text" 
+                                    id="addonName" 
+                                    placeholder="Nome do adicional"
+                                    class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                >
+                                <input 
+                                    type="number" 
+                                    id="addonPrice" 
+                                    min="0" 
+                                    step="0.01" 
+                                    placeholder="Preço"
+                                    class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                >
+                                <button 
+                                    type="button" 
+                                    id="addAddonBtn"
+                                    class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                >
+                                    +
+                                </button>
+                            </div>
+
+                            <div id="currentAddons" class="space-y-2 hidden">
+                                <label class="text-sm font-medium">Adicionais do item:</label>
+                                <div id="addonsList"></div>
+                            </div>
+                        </div>
+
+                        <button 
+                            id="addItemBtn"
+                            class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            + Adicionar ao Pedido
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Informações do Pedido -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-xl font-semibold mb-4">Informações do Pedido</h2>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label for="observations" class="block text-sm font-medium text-gray-700 mb-1">Observações</label>
+                            <textarea 
+                                id="observations" 
+                                placeholder="Observações sobre o pedido..."
+                                rows="3"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            ></textarea>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de Pedido</label>
+                            <div class="flex space-x-4">
+                                <label class="flex items-center">
+                                    <input type="radio" name="orderType" value="Retirada" checked class="mr-2">
+                                    Retirada
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="radio" name="orderType" value="Entrega" class="mr-2">
+                                    Entrega
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label for="customerName" class="block text-sm font-medium text-gray-700 mb-1">Nome do Cliente</label>
+                                <input 
+                                    type="text" 
+                                    id="customerName"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                >
+                            </div>
+                            <div>
+                                <label for="customerPhone" class="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
+                                <input 
+                                    type="text" 
+                                    id="customerPhone"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                >
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Forma de Pagamento</label>
+                            <div class="grid grid-cols-2 gap-4">
+                                <label class="flex items-center">
+                                    <input type="radio" name="paymentMethod" value="Dinheiro" checked class="mr-2">
+                                    Dinheiro
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="radio" name="paymentMethod" value="Cartão de Crédito" class="mr-2">
+                                    Cartão de Crédito
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="radio" name="paymentMethod" value="Cartão de Débito" class="mr-2">
+                                    Cartão de Débito
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="radio" name="paymentMethod" value="Pix" class="mr-2">
+                                    Pix
+                                </label>
+                            </div>
+                        </div>
+
+                        <div id="changeSection">
+                            <label for="changeFor" class="block text-sm font-medium text-gray-700 mb-1">Troco para</label>
+                            <input 
+                                type="number" 
+                                id="changeFor" 
+                                min="0" 
+                                step="0.01"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            >
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resumo do pedido -->
+            <div class="space-y-6">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-xl font-semibold mb-4">Itens do Pedido</h2>
+                    
+                    <div id="orderItems">
+                        <p class="text-gray-500 text-center py-4">Nenhum item adicionado ao pedido</p>
+                    </div>
+
+                    <div id="orderSummary" class="border-t pt-4 mt-4 hidden">
+                        <div class="flex justify-between">
+                            <span>Sub Total:</span>
+                            <span id="subtotal" class="font-medium">R$ 0,00</span>
+                        </div>
+                        <div class="flex justify-between font-bold mt-2">
+                            <span>Total:</span>
+                            <span id="total">R$ 0,00</span>
+                        </div>
+                        <div id="changeInfo" class="hidden">
+                            <div class="flex justify-between mt-2">
+                                <span>Troco para:</span>
+                                <span id="changeForDisplay">R$ 0,00</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Troco a devolver:</span>
+                                <span id="changeAmount">R$ 0,00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button 
+                    id="printBtn"
+                    class="w-full bg-green-600 text-white py-3 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed text-lg"
+                    disabled
+                >
+                    🖨️ Imprimir Pedido
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de impressão -->
+    <div id="printModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-lg shadow-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center p-4 border-b">
+                <h2 class="text-xl font-bold">Visualização do Pedido</h2>
+                <button id="closeModal" class="text-gray-500 hover:text-gray-700">
+                    ✕
+                </button>
+            </div>
+            
+            <div class="p-4">
+                <div id="receiptContent" class="receipt-content"></div>
+            </div>
+            
+            <div class="p-4 border-t flex justify-end no-print">
+                <button id="printAgainBtn" class="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">
+                    Imprimir Novamente
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Estado da aplicação
+        let orderItems = [];
+        let currentAddons = [];
+        let orderNumber = 1;
+
+        // Elementos DOM
+        const itemNameInput = document.getElementById('itemName');
+        const itemPriceInput = document.getElementById('itemPrice');
+        const addonNameInput = document.getElementById('addonName');
+        const addonPriceInput = document.getElementById('addonPrice');
+        const addAddonBtn = document.getElementById('addAddonBtn');
+        const addItemBtn = document.getElementById('addItemBtn');
+        const orderItemsDiv = document.getElementById('orderItems');
+        const orderSummaryDiv = document.getElementById('orderSummary');
+        const printBtn = document.getElementById('printBtn');
+        const printModal = document.getElementById('printModal');
+        const closeModal = document.getElementById('closeModal');
+        const printAgainBtn = document.getElementById('printAgainBtn');
+        const changeSection = document.getElementById('changeSection');
+
+        // Formatação de moeda
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            }).format(value);
+        }
+
+        // Formatação de data e hora
+        function formatDateTime() {
+            const now = new Date();
+            const day = String(now.getDate()).padStart(2, '0');
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const year = now.getFullYear();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            
+            return `${day}/${month}/${year} - ${hours}:${minutes}:${seconds}`;
+        }
+
+        // Adicionar adicional ao item atual
+        function addAddon() {
+            const name = addonNameInput.value.trim();
+            const price = parseFloat(addonPriceInput.value) || 0;
+            
+            if (!name || price <= 0) return;
+            
+            currentAddons.push({ name, price });
+            updateAddonsDisplay();
+            
+            addonNameInput.value = '';
+            addonPriceInput.value = '';
+        }
+
+        // Atualizar exibição dos adicionais
+        function updateAddonsDisplay() {
+            const addonsDiv = document.getElementById('currentAddons');
+            const addonsList = document.getElementById('addonsList');
+            
+            if (currentAddons.length === 0) {
+                addonsDiv.classList.add('hidden');
+                return;
+            }
+            
+            addonsDiv.classList.remove('hidden');
+            addonsList.innerHTML = currentAddons.map((addon, index) => `
+                <div class="flex items-center justify-between bg-gray-50 p-2 rounded">
+                    <span class="text-sm">${addon.name} - ${formatCurrency(addon.price)}</span>
+                    <button onclick="removeAddon(${index})" class="text-red-500 hover:text-red-700">
+                        🗑️
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        // Remover adicional
+        function removeAddon(index) {
+            currentAddons.splice(index, 1);
+            updateAddonsDisplay();
+        }
+
+        // Adicionar item ao pedido
+        function addItemToOrder() {
+            const name = itemNameInput.value.trim();
+            const price = parseFloat(itemPriceInput.value) || 0;
+            
+            if (!name || price <= 0) return;
+            
+            const newItem = {
+                id: Date.now().toString(),
+                name,
+                price,
+                addons: [...currentAddons]
+            };
+            
+            orderItems.push(newItem);
+            updateOrderDisplay();
+            
+            // Limpar formulário
+            itemNameInput.value = '';
+            itemPriceInput.value = '';
+            currentAddons = [];
+            updateAddonsDisplay();
+        }
+
+        // Remover item do pedido
+        function removeItem(id) {
+            orderItems = orderItems.filter(item => item.id !== id);
+            updateOrderDisplay();
+        }
+
+        // Calcular subtotal
+        function calculateSubtotal() {
+            return orderItems.reduce((total, item) => {
+                const itemTotal = item.price;
+                const addonsTotal = item.addons.reduce((sum, addon) => sum + addon.price, 0);
+                return total + itemTotal + addonsTotal;
+            }, 0);
+        }
+
+        // Calcular troco
+        function calculateChange() {
+            const subtotal = calculateSubtotal();
+            const changeFor = parseFloat(document.getElementById('changeFor').value) || 0;
+            return changeFor > subtotal ? changeFor - subtotal : 0;
+        }
+
+        // Atualizar exibição do pedido
+        function updateOrderDisplay() {
+            if (orderItems.length === 0) {
+                orderItemsDiv.innerHTML = '<p class="text-gray-500 text-center py-4">Nenhum item adicionado ao pedido</p>';
+                orderSummaryDiv.classList.add('hidden');
+                printBtn.disabled = true;
+                return;
+            }
+            
+            orderItemsDiv.innerHTML = orderItems.map(item => `
+                <div class="border rounded-md p-3 relative mb-4">
+                    <button onclick="removeItem('${item.id}')" class="absolute top-2 right-2 text-red-500 hover:text-red-700">
+                        🗑️
+                    </button>
+                    
+                    <div class="font-medium">${item.name}</div>
+                    
+                    ${item.addons.length > 0 ? `
+                        <ul class="text-sm text-gray-600 mt-1 ml-4">
+                            ${item.addons.map(addon => `
+                                <li>• ${addon.name} (+${formatCurrency(addon.price)})</li>
+                            `).join('')}
+                        </ul>
+                    ` : ''}
+                    
+                    <div class="mt-2 text-sm font-medium">
+                        Valor: ${formatCurrency(item.price + item.addons.reduce((sum, addon) => sum + addon.price, 0))}
+                    </div>
+                </div>
+            `).join('');
+            
+            const subtotal = calculateSubtotal();
+            document.getElementById('subtotal').textContent = formatCurrency(subtotal);
+            document.getElementById('total').textContent = formatCurrency(subtotal);
+            
+            orderSummaryDiv.classList.remove('hidden');
+            printBtn.disabled = false;
+            
+            updateChangeDisplay();
+        }
+
+        // Atualizar exibição do troco
+        function updateChangeDisplay() {
+            const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+            const changeFor = parseFloat(document.getElementById('changeFor').value) || 0;
+            const changeInfo = document.getElementById('changeInfo');
+            
+            if (paymentMethod === 'Dinheiro' && changeFor > 0) {
+                document.getElementById('changeForDisplay').textContent = formatCurrency(changeFor);
+                document.getElementById('changeAmount').textContent = formatCurrency(calculateChange());
+                changeInfo.classList.remove('hidden');
+            } else {
+                changeInfo.classList.add('hidden');
+            }
+        }
+
+        // Gerar conteúdo do recibo
+        function generateReceiptContent() {
+            const observations = document.getElementById('observations').value.trim();
+            const orderType = document.querySelector('input[name="orderType"]:checked').value;
+            const customerName = document.getElementById('customerName').value.trim();
+            const customerPhone = document.getElementById('customerPhone').value.trim();
+            const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+            const changeFor = parseFloat(document.getElementById('changeFor').value) || 0;
+            const subtotal = calculateSubtotal();
+            const change = calculateChange();
+            
+            let content = `🔔 Pedido #${orderNumber} (${formatDateTime()})\n`;
+            content += `------------------------\n`;
+            
+            orderItems.forEach((item, index) => {
+                content += `${item.name}\n`;
+                item.addons.forEach(addon => {
+                    content += `   • ${addon.name} (+${formatCurrency(addon.price)})\n`;
+                });
+                content += `Valor: ${formatCurrency(item.price + item.addons.reduce((sum, addon) => sum + addon.price, 0))}\n`;
+                if (index < orderItems.length - 1) {
+                    content += `------------------------\n`;
+                }
+            });
+            
+            content += `------------------------\n`;
+            content += `Sub Total: ${formatCurrency(subtotal)}\n`;
+            content += `Total: ${formatCurrency(subtotal)}\n`;
+            content += `Forma de pagto: ${paymentMethod}\n`;
+            
+            if (paymentMethod === 'Dinheiro' && changeFor > 0) {
+                content += `Troco para: ${formatCurrency(changeFor)}\n`;
+                content += `Troco a devolver: ${formatCurrency(change)}\n`;
+            }
+            
+            if (observations) {
+                content += `\n📝 Observações:\n${observations}\n`;
+            }
+            
+            content += `------------------------\n`;
+            content += `Tipo: ${orderType}\n`;
+            
+            if (customerName || customerPhone) {
+                content += `\n`;
+                if (customerName) content += `👤 Cliente: ${customerName}\n`;
+                if (customerPhone) content += `📲 Telefone: ${customerPhone}\n`;
+            }
+            
+            return content;
+        }
+
+        // Imprimir pedido
+        function printOrder() {
+            const receiptContent = document.getElementById('receiptContent');
+            receiptContent.innerHTML = `<pre>${generateReceiptContent()}</pre>`;
+            
+            printModal.classList.remove('hidden');
+            printModal.classList.add('flex');
+            
+            // Imprimir automaticamente
+            setTimeout(() => {
+                window.print();
+            }, 500);
+            
+            orderNumber++;
+        }
+
+        // Event listeners
+        addAddonBtn.addEventListener('click', addAddon);
+        addItemBtn.addEventListener('click', addItemToOrder);
+        printBtn.addEventListener('click', printOrder);
+        printAgainBtn.addEventListener('click', () => window.print());
+        
+        closeModal.addEventListener('click', () => {
+            printModal.classList.add('hidden');
+            printModal.classList.remove('flex');
+        });
+
+        // Controlar exibição do campo de troco
+        document.querySelectorAll('input[name="paymentMethod"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                if (e.target.value === 'Dinheiro') {
+                    changeSection.classList.remove('hidden');
+                } else {
+                    changeSection.classList.add('hidden');
+                    document.getElementById('changeFor').value = '';
+                }
+                updateChangeDisplay();
+            });
+        });
+
+        // Atualizar troco quando valor mudar
+        document.getElementById('changeFor').addEventListener('input', updateChangeDisplay);
+
+        // Permitir Enter para adicionar addon
+        addonNameInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addAddon();
+        });
+        
+        addonPriceInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addAddon();
+        });
+
+        // Permitir Enter para adicionar item
+        itemNameInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addItemToOrder();
+        });
+        
+        itemPriceInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addItemToOrder();
+        });
+    </script>
+</body>
+</html>
