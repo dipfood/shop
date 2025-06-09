@@ -1,359 +1,350 @@
-<!DOCTYPE html><html><head><base href="/">
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DipFood Delivery - Cardápio Digital</title>
-<link rel="icon" type="image/png" sizes="64x64" href="logo.png">
-<link rel="apple-touch-icon" href="https://www.dropbox.com/scl/fi/ypwrllrq0g1bcez8agtwh/LOGODIPFOOD.png?rlkey=smn7b1vhr49plbjstcnyspfy6&dl=1">
-<link rel="apple-touch-startup-image" href="https://www.dropbox.com/scl/fi/ypwrllrq0g1bcez8agtwh/LOGODIPFOOD.png?rlkey=smn7b1vhr49plbjstcnyspfy6&dl=1">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&amp;display=swap" rel="stylesheet">
-<style>
-  :root {
-    --primary: #e13737;
-    --secondary: #e66921;
-    --dark: #1c1e1f;
-    --light: #d62727;
-    --white: #e9dbdb;
-    --branco: #ffffff;
-  }
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DipFood - Cardápio Digital para Restaurantes</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/png" sizes="64x64" href="logo.png">
+    <link rel="apple-touch-icon" href="https://www.dropbox.com/scl/fi/ypwrllrq0g1bcez8agtwh/LOGODIPFOOD.png?rlkey=smn7b1vhr49plbjstcnyspfy6&dl=1">
+    <link rel="apple-touch-startup-image" href="https://www.dropbox.com/scl/fi/ypwrllrq0g1bcez8agtwh/LOGODIPFOOD.png?rlkey=smn7b1vhr49plbjstcnyspfy6&dl=1">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header" id="header">
+        <nav class="nav container">
+            <div class="nav__logo">
+                <span>DipFood</span>
+            </div>
+            
+            <div class="nav__menu" id="nav-menu">
+                <ul class="nav__list">
+                    <li class="nav__item">
+                        <a href="#beneficios" class="nav__link">Benefícios</a>
+                    </li>
+                    <li class="nav__item">
+                        <a href="#planos" class="nav__link">Planos</a>
+                    </li>
+                    <li class="nav__item">
+                        <a href="#contato" class="nav__link">Contato</a>
+                    </li>
+                    <li class="nav__item">
+                        <button class="nav__cta" onclick="openModal()">Fale Conosco</button>
+                    </li>
+                </ul>
+            </div>
 
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Poppins', sans-serif;
-  }
+            <div class="nav__toggle" id="nav-toggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </nav>
+    </header>
 
-  body {
-    background: var(--light);
-    color: var(--dark);
-  }
+    <!-- Hero -->
+    <section class="hero">
+        <div class="hero__container container">
+            <div class="hero__content">
+                <h1 class="hero__title">
+                    Transforme seu <span class="text-gradient">Restaurante</span> 
+                    com Cardápio Digital
+                </h1>
+                <p class="hero__description">
+                    Modernize seu estabelecimento com nossa solução completa de cardápio digital e PDV. 
+                    Aumente suas vendas, reduza custos e ofereça uma experiência única aos seus clientes.
+                </p>
+                <div class="hero__buttons">
+                    <a href="https://dipfood.site/Comercios/testecardapio/" target="_blank" class="btn btn--primary">
+                        Testar Cardápio
+                    </a>
+                    <a href="PDV.HTML" target="_blank" class="btn btn--outline">
+                        Testar PDV
+                    </a>
+                    <button class="btn btn--secondary" onclick="openModal()">
+                        Fale Conosco
+                    </button>
+                </div>
+            </div>
+            <div class="hero__image">
+                <img src="bannerlogo.png" alt="Cardápio Digital">
+            </div>
+        </div>
+    </section>
 
-  .hero {
-    background: linear-gradient(45deg, var(--primary), var(--secondary));
-    min-height: 80vh;
-    padding: 2rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    overflow: hidden;
-  }
+    <!-- Sobre -->
+    <section class="about section">
+        <div class="container">
+            <div class="about__container">
+                <div class="about__content">
+                    <h2 class="section__title">
+                        Sobre a <span class="text-gradient">DipFood</span>
+                    </h2>
+                    <p class="about__description">
+                        Somos especialistas em soluções digitais para o setor gastronômico. 
+                        Nossa missão é ajudar restaurantes, bares e cafés a modernizarem 
+                        seus processos e aumentarem sua rentabilidade através da tecnologia.
+                    </p>
+                    <div class="about__features">
+                        <div class="feature">
+                            <div class="feature__icon">🚀</div>
+                            <div class="feature__content">
+                                <h3>Inovação</h3>
+                                <p>Tecnologia de ponta para seu negócio</p>
+                            </div>
+                        </div>
+                        <div class="feature">
+                            <div class="feature__icon">💡</div>
+                            <div class="feature__content">
+                                <h3>Simplicidade</h3>
+                                <p>Fácil de usar e implementar</p>
+                            </div>
+                        </div>
+                        <div class="feature">
+                            <div class="feature__icon">📈</div>
+                            <div class="feature__content">
+                                <h3>Resultados</h3>
+                                <p>Aumento comprovado nas vendas</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="about__image">
+                    <img src="bannerlogo.png" alt="Sobre DipFood">
+                </div>
+            </div>
+        </div>
+    </section>
 
-  .hero-content {
-    text-align: center;
-    color: white;
-    z-index: 1;
-    max-width: 800px;
-  }
+    <!-- Benefícios -->
+    <section id="beneficios" class="benefits section">
+        <div class="container">
+            <div class="section__header">
+                <h2 class="section__title">
+                    Por que escolher o <span class="text-gradient">DipFood</span>?
+                </h2>
+                <p class="section__subtitle">
+                    Descubra todos os benefícios que nossa solução pode oferecer ao seu estabelecimento
+                </p>
+            </div>
 
-  .hero h1 {
-    font-size: 3.5rem;
-    margin-bottom: 1rem;
-    animation: fadeIn 1s ease-in;
-  }
+            <div class="benefits__grid">
+                <div class="benefit__card">
+                    <div class="benefit__icon">💰</div>
+                    <h3 class="benefit__title">Economia de até 70%</h3>
+                    <p class="benefit__description">
+                        Elimine custos com impressão e atualizações constantes do cardápio físico
+                    </p>
+                </div>
 
-  .hero p {
-    font-size: 1.2rem;
-    margin-bottom: 2rem;
-  }
+                <div class="benefit__card">
+                    <div class="benefit__icon">📊</div>
+                    <h3 class="benefit__title">Aumento de 30% nas vendas</h3>
+                    <p class="benefit__description">
+                        Imagens atrativas e sugestões inteligentes aumentam o ticket médio
+                    </p>
+                </div>
 
-  .btn {
-    padding: 1rem 2rem;
-    border: none;
-    border-radius: 50px;
-    font-size: 1.1rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-decoration: none;
-    display: inline-block;
-  }
+                <div class="benefit__card">
+                    <div class="benefit__icon">⚡</div>
+                    <h3 class="benefit__title">Atualizações em tempo real</h3>
+                    <p class="benefit__description">
+                        Modifique preços, pratos e promoções instantaneamente
+                    </p>
+                </div>
 
-  .btn-primary {
-    background: rgb(250, 250, 250);
-    color: var(--primary);
-  }
+                <div class="benefit__card">
+                    <div class="benefit__icon">🎯</div>
+                    <h3 class="benefit__title">Experiência personalizada</h3>
+                    <p class="benefit__description">
+                        Ofereça recomendações baseadas no histórico do cliente
+                    </p>
+                </div>
 
-  .btn-primary:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-  }
+                <div class="benefit__card">
+                    <div class="benefit__icon">📱</div>
+                    <h3 class="benefit__title">Acesso via QR Code</h3>
+                    <p class="benefit__description">
+                        Clientes acessam o cardápio pelo próprio celular
+                    </p>
+                </div>
 
-  .features, .why-buy {
-    padding: 5rem 2rem;
-    max-width: 1200px;
-    margin: 0 auto;
-  }
+                <div class="benefit__card">
+                    <div class="benefit__icon">🔒</div>
+                    <h3 class="benefit__title">Segurança garantida</h3>
+                    <p class="benefit__description">
+                        Dados protegidos com criptografia de ponta
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
 
-  .features {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 2rem;
-  }
+    <!-- Planos -->
+    <section id="planos" class="plans section">
+        <div class="container">
+            <div class="section__header">
+                <h2 class="section__title">
+                    Escolha o <span class="text-gradient">plano ideal</span>
+                </h2>
+                <p class="section__subtitle">
+                    Temos a solução perfeita para cada tipo de estabelecimento
+                </p>
+            </div>
 
-  .feature-card {
-    background: white;
-    padding: 2rem;
-    border-radius: 15px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    text-align: center;
-    transition: transform 0.3s ease;
-  }
+            <div class="plans__grid">
+                <div class="plan__card">
+                    <div class="plan__header">
+                        <h3 class="plan__name">Cardápio Digital</h3>
+                        <div class="plan__price">
+                            <span class="plan__currency">R$</span>
+                            <span class="plan__amount">19,90</span>
+                            <span class="plan__period">/mês</span>
+                        </div>
+                    </div>
+                    <ul class="plan__features">
+                        <li class="plan__feature">
+                            <span class="feature__check">✓</span>
+                            1 Empresa
+                        </li>
+                        <li class="plan__feature">
+                            <span class="feature__check">✓</span>
+                            Cor e Logo Personalizada
+                        </li>
+                        <li class="plan__feature">
+                            <span class="feature__check">✓</span>
+                            QR Code personalizado
+                        </li>
+                        <li class="plan__feature">
+                            <span class="feature__check">✓</span>
+                            Até 50 Produtos
+                        </li>
+                        <li class="plan__feature">
+                            <span class="feature__check">✓</span>
+                            Suporte 24h
+                        </li>
+                    </ul>
+                    <button class="plan__button btn btn--outline">           Escolher Plano</button>
+                </div>
 
-  .feature-card:hover {
-    transform: translateY(-10px);
-  }
+                <div class="plan__card plan__card--featured">
+                    <div class="plan__badge">Mais Popular</div>
+                    <div class="plan__header">
+                        <h3 class="plan__name">Profissional</h3>
+                        <div class="plan__price">
+                            <span class="plan__currency">R$</span>
+                            <span class="plan__amount">39,99</span>
+                            <span class="plan__period">/mês</span>
+                        </div>
+                    </div>
+                    <ul class="plan__features">
+                        <li class="plan__feature">
+                            <span class="feature__check">✓</span>
+                            Tudo do plano 1
+                        </li>
+                        <li class="plan__feature">
+                            <span class="feature__check">✓</span>
+                            Produtos ilimitados
+                        </li>
+                        <li class="plan__feature">
+                            <span class="feature__check">✓</span>
+                            Sistema PDV integrado
+                        </li>
+                        <li class="plan__feature">
+                            <span class="feature__check">✓</span>
+                            Relatórios avançados
+                        </li>
+                        <li class="plan__feature">
+                            <span class="feature__check">✓</span>
+                            Até 2 Empresas
+                        </li>
+                    </ul>
+                    <button class="plan__button btn btn--primary">Escolher Plano</button>
+                </div>
+            </div>
+        </div>
+    </section>
 
-  .feature-icon {
-    width: 80px;
-    height: 80px;
-    margin-bottom: 1rem;
-  }
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer__container">
+                <div class="footer__content">
+                    <div class="footer__section">
+                        <div class="footer__logo">
+                            <span>DipFood</span>
+                        </div>
+                        <p class="footer__description">
+                            Transformando restaurantes através da tecnologia. 
+                            Sua solução completa para cardápio digital e gestão de vendas.
+                        </p>
+                    </div>
 
-  .benefits-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 2rem;
-    margin-top: 3rem;
-  }
+                    <div class="footer__section">
+                        <h4 class="footer__title">Links Rápidos</h4>
+                        <ul class="footer__links">
+                            <li><a href="#beneficios">Benefícios</a></li>
+                            <li><a href="#planos">Planos</a></li>
+                            <li><a href="#contato">Contato</a></li>
+                            <li><a href="#">Blog</a></li>
+                        </ul>
+                    </div>
 
-  .benefit-item {
-    padding: 1.5rem;
-    background: var(--white);
-    border-radius: 10px;
-    transition: transform 0.3s ease;
-  }
+                    <div class="footer__section">
+                        <h4 class="footer__title">Contato</h4>
+                        <ul class="footer__links">
+                            <li>📍 SEDE SB</li>
+                        </ul>
+                    </div>
+                </div>
 
-  .benefit-item:hover {
-    transform: translateY(-5px);
-  }
+                <div class="footer__bottom">
+                    <p>&copy; <span id="currentYear"></span> DipFood. Todos os direitos reservados.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
 
-  .benefit-item h4 {
-    color: var(--dark);
-    margin-bottom: 1rem;
-  }
+    <!-- Modal de Seleção de Cidade -->
+    <div id="cityModal" class="modal">
+        <div class="modal__overlay" onclick="closeModal()"></div>
+        <div class="modal__content">
+            <button class="modal__close" onclick="closeModal()">×</button>
+            
+            <div class="modal__header">
+                <h3 class="modal__title">Escolha sua cidade</h3>
+                <p class="modal__subtitle">Selecione sua cidade para falar com nosso representante local</p>
+            </div>
 
-  .why-buy h2 {
-    color: var(--dark);
-    margin-bottom: 2rem;
-    font-size: 2.5rem;
-    text-align: center;
-  }
+            <div class="modal__cities">
+                <button class="city__option" onclick="selectCity('5519995165953', 'Santa Bárbara d\'Oeste')">
+                    <div class="city__info">
+                        <div class="city__icon">📍</div>
+                        <div class="city__details">
+                            <h4 class="city__name">Santa Bárbara d'Oeste</h4>
+                            <p class="city__phone">📞 (19) 99516-5953</p>
+                        </div>
+                    </div>
+                    <div class="city__arrow">→</div>
+                </button>
 
-  .pricing {
-    padding: 5rem 2rem;
-    background: var(--branco);
-    text-align: center;
-  }
+                <button class="city__option" onclick="selectCity('5517992095122', 'Novo Horizonte')">
+                    <div class="city__info">
+                        <div class="city__icon">📍</div>
+                        <div class="city__details">
+                            <h4 class="city__name">Novo Horizonte</h4>
+                            <p class="city__phone">📞 (17) 99209-5122</p>
+                        </div>
+                    </div>
+                    <div class="city__arrow">→</div>
+                </button>
+            </div>
 
-  .pricing-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 2rem;
-    max-width: 1200px;
-    margin: 2rem auto;
-  }
-
-  .price-card {
-    background: white;
-    padding: 2rem;
-    border-radius: 15px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-  }
-
-  .price-card.featured {
-    border: 3px solid var(--primary);
-    transform: scale(1.05);
-  }
-
-  .price {
-    font-size: 2.5rem;
-    color: var(--primary);
-    margin: 1rem 0;
-  }
-
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  @media (max-width: 768px) {
-    .hero h1 {
-      font-size: 2.5rem;
-    }
-  }
-</style>
-
-<script>
-  document.addEventListener('keydown', function(event) {
-    if (event.ctrlKey && event.key === 'u') {
-      event.preventDefault();
-      alert('Acesso ao código-fonte bloqueado!');
-    }
-    if (event.key === 'F12') {
-      event.preventDefault();
-      alert('Ferramentas de desenvolvedor bloqueadas!');
-    }
-    if (event.button === 2) {
-      event.preventDefault();
-      alert('Clique direito desabilitado!');
-    }
-  });
-  document.addEventListener('contextmenu', function(event) {
-    event.preventDefault();
-    alert('Clique direito desabilitado!');
-  });
-</script>
-</head><body>
-
-<section class="hero">
-  <div class="hero-content">
-    <h1>DipFood Delivery</h1>
-    <p>Transforme seu cardápio em uma experiência digital incrível. Aumente suas vendas e encante seus clientes.</p>
-    <a href="https://dipfood.site/Comercios/testecardapio/" class="btn btn-primary" target="_blank">Teste Cardápio</a>
-    <p> </p>
-    <a href="PDV.HTML" class="btn btn-primary" target="_blank">Teste PDV</a>
-    <p> </p>
-  </div>
-</section>
-
-<!-- NOVA SEÇÃO ADICIONADA -->
-<section class="why-buy" style="background: white; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); padding: 3rem 2rem;">
-  <h2>Entre em Contato por Cidade</h2>
-  <p style="text-align: center;">Escolha sua cidade para falar com o número correspondente:</p>
-  <div style="text-align: center; margin-top: 20px;">
-    <select id="cidade-select" class="btn btn-primary" style="margin-bottom: 1rem;">
-      <option value="">Selecione a cidade</option>
-      <option value="novo_horizonte">Novo Horizonte</option>
-      <option value="santa_barbara">Santa Bárbara</option>
-    </select>
-    <br>
-    <a id="contato-cidade" href="#" class="btn btn-primary" target="_blank" style="display: none;">Falar via WhatsApp</a>
-  </div>
-</section>
-
-
-<section class="why-buy">
-  <h2>Por que Assinar?</h2>
-  <p>O cardápio digital é o futuro da sua operação gastronômica. Descubra como ele pode revolucionar seu negócio:</p>
-
-  <div class="benefits-grid">
-    <div class="benefit-item">
-      <h4>Economia Real</h4>
-      <p>Economize até 70% em custos de impressão e atualizações de cardápio físico.</p>
+            <p class="modal__footer">Você será redirecionado para o WhatsApp</p>
+        </div>
     </div>
-    <div class="benefit-item">
-      <h4>Aumento nas Vendas</h4>
-      <p>Cardápios digitais aumentam em média 30% o ticket médio com fotos atrativas.</p>
-    </div>
-    <div class="benefit-item">
-      <h4>Gestão Eficiente</h4>
-      <p>Atualize preços e itens instantaneamente, gerencie múltiplas unidades.</p>
-    </div>
-    <div class="benefit-item">
-      <h4>Experiência Superior</h4>
-      <p>Ofereça uma experiência moderna e higiênica aos seus clientes.</p>
-    </div>
-  </div>
-</section>
 
-<section class="features">
-  <div class="feature-card">
-    <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2">
-      <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
-    </svg>
-    <h3>Fácil Atualização</h3>
-    <p>Atualize seus preços e cardápio em tempo real.</p>
-  </div>
-  <div class="feature-card">
-    <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2">
-      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-    </svg>
-    <h3>100% Seguro</h3>
-    <p>Proteção de dados e backup automático de todas as informações.</p>
-  </div>
-  <div class="feature-card">
-    <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2">
-      <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
-    </svg>
-    <h3>Analytics Avançado</h3>
-    <p>Acompanhe pedidos e preferências dos clientes com relatórios detalhados.</p>
-  </div>
-</section>
-
-<section class="pricing">
-  <h2>Planos e Preços</h2>
-  <div class="pricing-cards">
-    <div class="price-card">
-      <h3>Básico</h3>
-      <div class="price">R$19,97/mês</div>
-      <ul>
-        <li>Cardápio Digital</li>
-        <li>QR Code Personalizado</li>
-        <li>Cor e Logo Personalizada</li>
-        <li>Atualizações Semanais!</li>
-      </ul>
-      <a href="https://wa.me/5517992095122?text=Olá! Tenho interesse no plano Básico do DipFood Delivery por R$19,97/mês" class="btn btn-primary" target="_blank">Escolher Plano</a>
-    </div>
-
-    <div class="price-card featured">
-      <h3>Premium</h3>
-      <div class="price">R$39,96/mês</div>
-      <ul>
-        <li>Tudo do Plano Básico</li>
-        <li>Suporte Prioritário</li>
-        <li>PDV Simples Fluxo de CAIXA</li>
-        <li>Até 2 Empresas</li>
-      </ul>
-      <a href="https://wa.me/5517992095122?text=Olá! Tenho interesse no plano Premium do DipFood Delivery por R$39,96/mês para até 2 empresas" class="btn btn-primary" target="_blank">Escolher Plano</a>
-    </div>
-
-    <div class="price-card">
-      <h3>Enterprise</h3>
-      <div class="price">Sob Consulta</div>
-      <ul>
-        <li>Soluções Personalizadas</li>
-        <li>Suporte 24/7</li>
-        <li>Treinamento da Equipe</li>
-      </ul>
-      <a href="https://wa.me/5517992095122?text=Olá! Gostaria de saber mais sobre o plano Enterprise do DipFood Delivery" class="btn btn-primary" target="_blank">Falar com Consultor</a>
-    </div>
-  </div>
-</section>
-
-<script>
-  const contatos = {
-    novo_horizonte: '5517992095122', // Substitua por número real
-    santa_barbara: '5519995165953'   // Substitua por número real
-  };
-
-  document.getElementById('cidade-select').addEventListener('change', function() {
-    const cidade = this.value;
-    const link = document.getElementById('contato-cidade');
-
-    if (cidade && contatos[cidade]) {
-      link.href = `https://wa.me/${contatos[cidade]}?text=Olá!`;
-      link.style.display = 'inline-block';
-    } else {
-      link.style.display = 'none';
-    }
-  });
-
-  document.addEventListener('DOMContentLoaded', function() {
-    const features = document.querySelectorAll('.feature-card, .benefit-item');
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.style.opacity = 1;
-          entry.target.style.transform = 'translateY(0)';
-        }
-      });
-    });
-    features.forEach(feature => {
-      feature.style.opacity = 0;
-      feature.style.transform = 'translateY(20px)';
-      feature.style.transition = 'all 0.6s ease-out';
-      observer.observe(feature);
-    });
-  });
-</script>
-</body></html>
+    <script src="script.js"></script>
+</body>
+</html>
