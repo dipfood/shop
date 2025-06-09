@@ -48,12 +48,7 @@ function closeModal() {
 }
 
 function selectCity(phone, cityName) {
-  const message = `Olá! Sou de ${cityName} e gostaria de saber mais sobre os serviços da DipFood.`
-  const encodedMessage = encodeURIComponent(message)
-  const whatsappUrl = `https://wa.me/${phone}?text=${encodedMessage}`
-
-  window.open(whatsappUrl, "_blank")
-  closeModal()
+  selectCityForPlan(phone, cityName)
 }
 
 // Fechar modal ao clicar fora
@@ -86,6 +81,7 @@ if (contactForm) {
 
 // ===== BOTÕES DOS PLANOS =====
 const planButtons = document.querySelectorAll(".plan__button")
+let selectedPlan = null
 
 planButtons.forEach((button) => {
   button.addEventListener("click", (e) => {
@@ -93,11 +89,36 @@ planButtons.forEach((button) => {
     const planName = planCard.querySelector(".plan__name").textContent
     const planPrice = planCard.querySelector(".plan__amount").textContent
 
-    alert(
-      `Você selecionou o plano ${planName} por R$${planPrice}/mês. Entraremos em contato para finalizar sua assinatura!`,
-    )
+    // Armazenar informações do plano selecionado
+    selectedPlan = {
+      name: planName,
+      price: planPrice,
+    }
+
+    // Abrir modal de seleção de cidade
+    openModal()
   })
 })
+
+// Modificar a função selectCity para incluir informações do plano
+function selectCityForPlan(phone, cityName) {
+  let message
+
+  if (selectedPlan) {
+    message = `Olá! Sou de ${cityName} e tenho interesse no plano ${selectedPlan.name} por R$${selectedPlan.price}/mês. Gostaria de mais informações sobre a contratação.`
+  } else {
+    message = `Olá! Sou de ${cityName} e gostaria de saber mais sobre os serviços da DipFood.`
+  }
+
+  const encodedMessage = encodeURIComponent(message)
+  const whatsappUrl = `https://wa.me/${phone}?text=${encodedMessage}`
+
+  window.open(whatsappUrl, "_blank")
+  closeModal()
+
+  // Limpar plano selecionado
+  selectedPlan = null
+}
 
 // ===== SCROLL SUAVE =====
 document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
