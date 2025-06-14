@@ -1,4 +1,4 @@
-    <!-- Add Font Awesome CDN in the <head> section -->
+<!-- Add Font Awesome CDN in the <head> section -->
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <meta charset="UTF-8">
@@ -40,7 +40,7 @@
                 setTimeout(function() {
                     loadingScreen.style.display = 'none';
                 }, 500);
-            }, 2000);
+            }, 3000);
         });
 
         function checkout() {
@@ -85,31 +85,144 @@
             return menuItems.drinks.some(drink => drink.name === item.name);
         }
 
-        function createMenuItem(item) {
-            // Don't show add-ons for drinks or items marked with noAddons
-            const addOnsHtml = (!item.noAddons && !isDrinkItem(item)) ? 
-                `<div class="add-ons">
-                    ${addOns.map((addon, idx) => `
-                        <label class="addon-option">
-                            <input type="checkbox" data-addon="${addon.name}" data-price="${addon.price}">
-                            ${addon.name} (+R$ ${addon.price.toFixed(2)})
-                        </label>
-                    `).join('')}
-                   </div>`
-                : '';
+        let currentItem = null;
+        let currentCategory = 'all';
 
-            return `
-                <div class="menu-item">
-                    <h3>${item.name}</h3>
-                    <p>${item.description}</p>
-                    <div class="price">R$ ${item.price.toFixed(2)}</div>
-                    ${addOnsHtml}
-                    <button class="add-to-cart" onclick="addToCart('${item.name}', ${item.price}, this)">
-                        Adicionar ao Carrinho
-                    </button>
-                </div>
-            `;
+function openAddonsModal(itemName, itemPrice) {
+    currentItem = { name: itemName, price: itemPrice };
+    populateAddonsModal();
+    document.getElementById('addons-modal').style.display = 'flex';
+    
+    // Reset all checkboxes
+    document.querySelectorAll('#addons-modal input[type="checkbox"]').forEach(checkbox => {
+        checkbox.checked = false;
+    });
+    
+    updateModalTotal();
+}
+
+function closeAddonsModal() {
+    document.getElementById('addons-modal').style.display = 'none';
+    currentItem = null;
+}
+
+function updateModalTotal() {
+    if (!currentItem) return;
+    
+    let total = currentItem.price;
+    const selectedAddons = Array.from(document.querySelectorAll('#addons-modal input[type="checkbox"]:checked'));
+    
+    selectedAddons.forEach(checkbox => {
+        total += parseFloat(checkbox.dataset.price);
+    });
+    
+    document.getElementById('modal-total').textContent = `Total: R$ ${total.toFixed(2)}`;
+}
+
+function populateAddonsModal() {
+    const addonsGrid = document.getElementById('addons-grid');
+    addonsGrid.innerHTML = '';
+    
+    addOns.forEach(addon => {
+        const addonElement = document.createElement('label');
+        addonElement.className = 'addon-option';
+        addonElement.innerHTML = `
+            <input type="checkbox" data-addon="${addon.name}" data-price="${addon.price}" onchange="updateModalTotal()">
+            <span>${addon.name} (+R$ ${addon.price.toFixed(2)})</span>
+        `;
+        addonsGrid.appendChild(addonElement);
+    });
+}
+
+function confirmAddons() {
+    if (!currentItem) return;
+    
+    const selectedAddons = Array.from(document.querySelectorAll('#addons-modal input[type="checkbox"]:checked')).map(checkbox => ({
+        name: checkbox.dataset.addon,
+        price: parseFloat(checkbox.dataset.price)
+    }));
+    
+    // Check if item with same name and addons already exists
+    const existingItemIndex = cart.findIndex(item => {
+        if (item.name !== currentItem.name) return false;
+        
+        // Compare addons
+        if ((!item.addons || item.addons.length === 0) && (!selectedAddons || selectedAddons.length === 0)) {
+            return true;
         }
+        
+        if (!item.addons || !selectedAddons || item.addons.length !== selectedAddons.length) {
+            return false;
+        }
+        
+        // Sort both arrays by name for comparison
+        const sortedItemAddons = [...item.addons].sort((a, b) => a.name.localeCompare(b.name));
+        const sortedSelectedAddons = [...selectedAddons].sort((a, b) => a.name.localeCompare(b.name));
+        
+        return sortedItemAddons.every((addon, index) => 
+            addon.name === sortedSelectedAddons[index].name && 
+            addon.price === sortedSelectedAddons[index].price
+        );
+    });
+    
+    if (existingItemIndex !== -1) {
+        // Item exists, increment quantity
+        cart[existingItemIndex].quantity = (cart[existingItemIndex].quantity || 1) + 1;
+    } else {
+        // New item, add to cart
+        cart.push({
+            name: currentItem.name,
+            price: currentItem.price,
+            addons: selectedAddons,
+            quantity: 1
+        });
+    }
+    
+    updateCart();
+    closeAddonsModal();
+}
+
+function createMenuItem(item) {
+    return `
+        <div class="menu-item">
+            <h3>${item.name}</h3>
+            <p>${item.description}</p>
+            <div class="price">R$ ${item.price.toFixed(2)}</div>
+            <div class="item-buttons">
+                <button class="add-to-cart" onclick="addToCart('${item.name}', ${item.price}, this)">
+                    Adicionar ao Carrinho
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+function selectCategory(category) {
+    currentCategory = category;
+    
+    // Update active category button
+    document.querySelectorAll('.category-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    document.querySelector(`[data-category="${category}"]`).classList.add('active');
+    
+    // Show/hide menu sections
+    const allSections = document.querySelectorAll('.menu-section');
+    allSections.forEach(section => {
+        section.style.display = 'none';
+    });
+    
+    if (category === 'all') {
+        allSections.forEach(section => {
+            section.style.display = 'block';
+        });
+    } else {
+        const targetSection = document.getElementById(category + '-section') || document.getElementById(category);
+        if (targetSection) {
+            targetSection.style.display = 'block';
+        }
+    }
+}
     </script>
     </head>
     <body>
@@ -119,7 +232,7 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background-color: white;  /* Changed from var(--secondary) to white */
+        background-color: white;
         display: flex;
         justify-content: center;
         align-items: center;
@@ -129,13 +242,12 @@
             <img src="logo.png" 
                  alt="Loading Logo" 
                  style="width: 150px; height: auto; margin-bottom: 20px;">
-            <p style="color: #ff6b01; margin-top: 20px; font-size: 18px;">Carregando...</p> <!-- Changed text color to orange (#ff6b01) -->
+            <p style="color: #ff6b01; margin-top: 20px; font-size: 18px;">Carregando...</p>
         </div>
     </div>
     
     <div class="header">
         <div>
-       
             <h1>Paris Burger</h1>
             <p style="font-size: 0.8rem; margin-top: 5px;">Nos Encontre: Marechal Candido Rondon, 442 - Jd São Benedito, Novo Horizonte, SP</p>
                 <p style="font-size: 0.8rem; margin-top: 5px;"></p>
@@ -204,18 +316,44 @@
                 </div>
             </div>
         </div>
-        <div class="nav-buttons" style="margin: 20px 0;">
-            <button class="nav-button" onclick="scrollToSection('specials-section')">Lanches</button>
-            <button class="nav-button" onclick="scrollToSection('diverse-section')">Artesanais</button>
-            <button class="nav-button" onclick="scrollToSection('frango-section')">Frango</button>
-            <button class="nav-button" onclick="scrollToSection('carne-section')">Carne</button>
-            <button class="nav-button" onclick="scrollToSection('dog-section')">HotDog</button>
-            <button class="nav-button" onclick="scrollToSection('drinks-section')">Bebidas</button>
+
+        <!-- Category Selector -->
+        <div class="category-selector">
+            <div class="category-scroll">
+                <button class="category-btn active" data-category="all" onclick="selectCategory('all')">
+                    <i class="fas fa-th-large"></i>
+                    <span>Todos</span>
+                </button>
+                <button class="category-btn" data-category="sandwiches" onclick="selectCategory('sandwiches')">
+                    <i class="fas fa-hamburger"></i>
+                    <span>Lanches</span>
+                </button>
+                <button class="category-btn" data-category="diverse" onclick="selectCategory('diverse')">
+                    <i class="fas fa-utensils"></i>
+                    <span>Artesanais</span>
+                </button>
+                <button class="category-btn" data-category="frango" onclick="selectCategory('frango')">
+                    <i class="fas fa-drumstick-bite"></i>
+                    <span>Frango</span>
+                </button>
+                <button class="category-btn" data-category="carne" onclick="selectCategory('carne')">
+                    <i class="fas fa-bacon"></i>
+                    <span>Carne</span>
+                </button>
+                <button class="category-btn" data-category="dog" onclick="selectCategory('dog')">
+                    <i class="fas fa-hotdog"></i>
+                    <span>HotDog</span>
+                </button>
+                <button class="category-btn" data-category="drinks" onclick="selectCategory('drinks')">
+                    <i class="fas fa-glass-cheers"></i>
+                    <span>Bebidas</span>
+                </button>
+            </div>
         </div>
 
-        <div class="menu-section" id="specials">
+        <div class="menu-section" id="sandwiches">
             <h2>Lanches</h2>
-            <div class="menu-grid" id="sandwiches"></div>
+            <div class="menu-grid" id="sandwiches-grid"></div>
         </div>
 
         <div class="menu-section" id="diverse-section">
@@ -265,7 +403,9 @@
         <h2>Carrinho</h2>
         <div id="cart-items"></div>
         <div id="cart-total">Total: R$ 0.00</div>
-        <button class="checkout-btn" onclick="checkout()">Finalizar Pedido</button>
+        <div class="cart-buttons">
+            <button class="checkout-btn" onclick="checkout()">Finalizar Pedido</button>
+        </div>
     </div>
     
     <script>
@@ -389,7 +529,13 @@
     
     function displayMenuItemsUpdate() {
         Object.keys(menuItems).forEach(category => {
-            const container = document.getElementById(category);
+            let container;
+            if (category === 'sandwiches') {
+                container = document.getElementById('sandwiches-grid');
+            } else {
+                container = document.getElementById(category);
+            }
+            
             if (container) {
                 menuItems[category].forEach(item => {
                     container.innerHTML += createMenuItem(item);
@@ -399,82 +545,103 @@
     }
     
     function addToCart(name, price, buttonElement) {
-        const menuItem = buttonElement.closest('.menu-item');
-        const selectedAddons = Array.from(menuItem.querySelectorAll('.addon-option input:checked')).map(checkbox => ({
-            name: checkbox.dataset.addon,
-            price: parseFloat(checkbox.dataset.price)
-        }));
-        
-        cart.push({
-            name,
-            price,
-            addons: selectedAddons
-        });
-        
-        menuItem.querySelectorAll('.addon-option input').forEach(checkbox => checkbox.checked = false);
-        
-        updateCart();
+        // For drinks, add directly to cart without showing addons modal
+        if (isDrinkItem({ name: name })) {
+            // Check if item already exists
+            const existingItemIndex = cart.findIndex(item => item.name === name && (!item.addons || item.addons.length === 0));
+            
+            if (existingItemIndex !== -1) {
+                cart[existingItemIndex].quantity = (cart[existingItemIndex].quantity || 1) + 1;
+            } else {
+                cart.push({
+                    name: name,
+                    price: price,
+                    addons: [],
+                    quantity: 1
+                });
+            }
+            
+            updateCart();
+        } else {
+            // For food items, show addons modal
+            openAddonsModal(name, price);
+        }
     }
     
     function updateCart() {
-        const cartItems = document.getElementById('cart-items');
-        const cartTotal = document.getElementById('cart-total');
-        let total = 0;
+    const cartItems = document.getElementById('cart-items');
+    const cartTotal = document.getElementById('cart-total');
+    let total = 0;
 
-        cartItems.innerHTML = '';
-        cart.forEach((item, index) => {
-            let itemTotal = item.price;
-            let addonsText = '';
-            
-            if (item.addons && item.addons.length > 0) {
-                addonsText = '<div class="cart-item-addons">';
-                item.addons.forEach(addon => {
-                    itemTotal += addon.price;
-                    addonsText += `<div>+ ${addon.name} (R$ ${addon.price.toFixed(2)})</div>`;
-                });
-                addonsText += '</div>';
-            }
-            
-            total += itemTotal;
-            cartItems.innerHTML += `
-                <div class="cart-item">
-                    <div>
-                        <span>${item.name}</span>
-                        ${addonsText}
-                    </div>
-                    <span>R$ ${itemTotal.toFixed(2)}</span>
+    cartItems.innerHTML = '';
+    cart.forEach((item, index) => {
+        let itemTotal = item.price;
+        let addonsText = '';
+        const quantity = item.quantity || 1;
+        
+        if (item.addons && item.addons.length > 0) {
+            addonsText = '<div class="cart-item-addons">';
+            item.addons.forEach(addon => {
+                itemTotal += addon.price;
+                addonsText += `<div>+ ${addon.name} (R$ ${addon.price.toFixed(2)})</div>`;
+            });
+            addonsText += '</div>';
+        }
+        
+        const totalItemPrice = itemTotal * quantity;
+        total += totalItemPrice;
+        
+        cartItems.innerHTML += `
+            <div class="cart-item">
+                <div>
+                    <span>${quantity}x ${item.name}</span>
+                    ${addonsText}
+                </div>
+                <span>R$ ${totalItemPrice.toFixed(2)}</span>
+                <div class="cart-item-controls">
+                    <button onclick="decreaseQuantity(${index})">-</button>
                     <button onclick="removeFromCart(${index})">X</button>
                 </div>
-            `;
-        });
+            </div>
+        `;
+    });
 
-        const deliveryType = document.querySelector('input[name="deliveryType"]:checked').value;
-        if (deliveryType === 'delivery') {
-            deliveryFee = 6.00;
-            cartItems.innerHTML += `
-                <div class="cart-item">
-                    <span>Taxa de Entrega</span>
-                    <span>R$ ${deliveryFee.toFixed(2)}</span>
-                </div>
-            `;
-            total += deliveryFee;
-        } else {
-            deliveryFee = 0;
-        }
-
-        cartTotal.innerHTML = `Total: R$ ${total.toFixed(2)}`;
-        
-        // Trigger change recalculation
-        const changeAmount = document.getElementById('changeAmount');
-        if (changeAmount && changeAmount.value) {
-            updateChangeDisplay(total);
-        }
+    const deliveryType = document.querySelector('input[name="deliveryType"]:checked').value;
+    if (deliveryType === 'delivery') {
+        deliveryFee = 6.00;
+        cartItems.innerHTML += `
+            <div class="cart-item">
+                <span>Taxa de Entrega</span>
+                <span>R$ ${deliveryFee.toFixed(2)}</span>
+            </div>
+        `;
+        total += deliveryFee;
+    } else {
+        deliveryFee = 0;
     }
+
+    cartTotal.innerHTML = `Total: R$ ${total.toFixed(2)}`;
+    
+    // Trigger change recalculation
+    const changeAmount = document.getElementById('changeAmount');
+    if (changeAmount && changeAmount.value) {
+        updateChangeDisplay(total);
+    }
+}
     
     function removeFromCart(index) {
         cart.splice(index, 1);
         updateCart();
     }
+    
+    function decreaseQuantity(index) {
+    if (cart[index].quantity > 1) {
+        cart[index].quantity--;
+    } else {
+        cart.splice(index, 1);
+    }
+    updateCart();
+}
     
     document.querySelectorAll('input[name="deliveryType"]').forEach(radio => {
         radio.addEventListener('change', function() {
@@ -507,12 +674,13 @@
 
     document.getElementById('changeAmount').addEventListener('input', function() {
         const cartTotal = cart.reduce((sum, item) => {
-            let itemTotal = item.price;
-            if (item.addons) {
-                itemTotal += item.addons.reduce((addonSum, addon) => addonSum + addon.price, 0);
-            }
-            return sum + itemTotal;
-        }, 0) + deliveryFee;
+        let itemTotal = item.price;
+        const quantity = item.quantity || 1;
+        if (item.addons) {
+            itemTotal += item.addons.reduce((addonSum, addon) => addonSum + addon.price, 0);
+        }
+        return sum + (itemTotal * quantity);
+    }, 0) + deliveryFee;
 
         updateChangeDisplay(cartTotal);
     });
@@ -537,12 +705,13 @@
         }
 
         let totalProdutos = cart.reduce((total, item) => {
-            let itemTotal = item.price;
-            if (item.addons && item.addons.length > 0) {
-                itemTotal += item.addons.reduce((addonSum, addon) => addonSum + addon.price, 0);
-            }
-            return total + itemTotal;
-        }, 0);
+        let itemTotal = item.price;
+        const quantity = item.quantity || 1;
+        if (item.addons && item.addons.length > 0) {
+            itemTotal += item.addons.reduce((addonSum, addon) => addonSum + addon.price, 0);
+        }
+        return total + (itemTotal * quantity);
+    }, 0);
 
         if (totalProdutos < 7) {
             alert("Seu Carrinho está vazio, Adicione Pedidos para Realizar o pedido!");
@@ -565,20 +734,23 @@
 
         // List items
         cart.forEach(item => {
-            let itemTotal = item.price;
-            message += `*${item.name}*\n`;
-            
-            if (item.addons && item.addons.length > 0) {
-                item.addons.forEach(addon => {
-                    message += `   • ${addon.name} (+R$ ${addon.price.toFixed(2)})\n`;
-                    itemTotal += addon.price;
-                });
-            }
-            
-            message += `*Valor:* R$ ${itemTotal.toFixed(2)}\n`;
-            message += `------------------------\n`;
-            subTotal += itemTotal;
-        });
+        let itemTotal = item.price;
+        const quantity = item.quantity || 1;
+        
+        message += `*${quantity}x ${item.name}*\n`;
+        
+        if (item.addons && item.addons.length > 0) {
+            item.addons.forEach(addon => {
+                message += `   • ${addon.name} (+R$ ${addon.price.toFixed(2)})\n`;
+                itemTotal += addon.price;
+            });
+        }
+        
+        const totalItemPrice = itemTotal * quantity;
+        message += `*Valor:* R$ ${totalItemPrice.toFixed(2)}\n`;
+        message += `------------------------\n`;
+        subTotal += totalItemPrice;
+    });
 
         let total = subTotal;
         
@@ -628,20 +800,30 @@
         window.open(`https://wa.me/5517996232492?text=${encodedMessage}`);
     }
     
-    function scrollToSection(sectionId) {
-        const section = document.getElementById(sectionId);
-        const headerOffset = 80;
-        const elementPosition = section.getBoundingClientRect().top;
-        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-    
-        window.scrollTo({
-            top: offsetPosition,
-            behavior: "smooth"
-        });
-    }
-    
     displayMenuItemsUpdate();
     document.addEventListener('DOMContentLoaded', loadOrderCounter);
+    populateAddonsModal();
     </script>
     
+    <!-- Addons Modal -->
+<div id="addons-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Escolha seus Extras</h3>
+            <button class="close-btn" onclick="closeAddonsModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="addons-grid" id="addons-grid">
+    <!-- Addons will be dynamically generated here -->
+</div>
+        </div>
+        <div class="modal-footer">
+            <div id="modal-total" class="modal-total">Total: R$ 0.00</div>
+            <div class="modal-buttons">
+                <button class="cancel-btn" onclick="closeAddonsModal()">Cancelar</button>
+                <button class="confirm-btn" onclick="confirmAddons()">Adicionar ao Carrinho</button>
+            </div>
+        </div>
+    </div>
+</div>
     </body></html>
