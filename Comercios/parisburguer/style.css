@@ -626,3 +626,113 @@ button:disabled {
   background-color: #f0f0f0;
   transform: translateY(-1px);
 }
+
+.payment-options-modal {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.payment-option {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.payment-option:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.payment-option input[type="radio"] {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+}
+
+.payment-option input[type="radio"]:checked + .payment-info {
+  color: var(--botoesred);
+}
+
+.payment-option input[type="radio"]:checked {
+  accent-color: var(--botoesred);
+}
+
+.payment-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.payment-info i {
+  font-size: 24px;
+  width: 30px;
+  text-align: center;
+}
+
+.pix-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 15px;
+  background: rgba(0, 255, 0, 0.1);
+  border-radius: 8px;
+  margin-top: 15px;
+}
+
+.pix-info i {
+  font-size: 24px;
+  color: #00ff00;
+}
+
+.pix-info p {
+  margin: 0;
+  color: white;
+  font-weight: bold;
+}
+
+.change-input {
+  width: 100%;
+  padding: 12px;
+  margin-top: 15px;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #333;
+}
+
+.change-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--botoesred);
+}
+
+@media (max-width: 480px) {
+  .payment-options-modal {
+    gap: 10px;
+  }
+
+  .payment-option {
+    padding: 12px;
+  }
+
+  .payment-info {
+    font-size: 14px;
+  }
+
+  .payment-info i {
+    font-size: 20px;
+    width: 25px;
+  }
+}

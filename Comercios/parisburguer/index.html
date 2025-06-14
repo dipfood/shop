@@ -43,43 +43,6 @@
             }, 3000);
         });
 
-        function checkout() {
-            // Increment order counter and save
-            orderCounter++;
-            saveOrderCounter();
-            
-            const name = document.getElementById('userName').value;
-            const phone = document.getElementById('userPhone').value;
-            const deliveryType = document.querySelector('input[name="deliveryType"]:checked').value;
-            const street = document.getElementById('userStreet').value;
-            const neighborhood = document.getElementById('userNeighborhood').value;
-            const number = document.getElementById('userNumber').value;
-            const paymentType = document.querySelector('input[name="paymentType"]:checked').value;
-            const observation = document.getElementById('orderObservation').value.trim();
-            
-            if (!name || !phone) {
-                alert('Por favor, preencha seu nome e telefone antes de finalizar o pedido.');
-                return;
-            }
-
-            if (deliveryType === 'delivery' && (!street || !neighborhood || !number)) {
-                alert('Por favor, preencha todos os campos do endereço para entrega.');
-                return;
-            }
-
-            // Get current date and time
-            const now = new Date();
-            const dateStr = now.toLocaleDateString();
-            const timeStr = now.toLocaleTimeString();
-
-            let message = `Pedido #${orderCounter}🔔 * (${dateStr} - ${timeStr})\n`;
-            message += `------------------------\n`;
-            
-            let subTotal = 0;
-        
-            // Rest of the checkout function remains the same...
-        }
-
         function isDrinkItem(item) {
             // Check if the item exists in the drinks category
             return menuItems.drinks.some(drink => drink.name === item.name);
@@ -394,7 +357,7 @@ function selectCategory(category) {
                 box-shadow: 0 4px 8px rgba(0,0,0,0.2);
                 transition: all 0.3s ease;
             ">
-                Tenha seu Cardápio Digital!
+                Seu Cardápio Digital Facil e Rápido
             </a>
         </div>
     </div>
