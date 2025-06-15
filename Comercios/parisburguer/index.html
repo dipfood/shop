@@ -186,6 +186,52 @@ function selectCategory(category) {
         }
     }
 }
+
+function saveUserData() {
+    const userData = {
+        name: document.getElementById('userName').value,
+        phone: document.getElementById('userPhone').value,
+        street: document.getElementById('userStreet').value,
+        neighborhood: document.getElementById('userNeighborhood').value,
+        number: document.getElementById('userNumber').value
+    };
+    
+    localStorage.setItem('parisUserData', JSON.stringify(userData));
+}
+
+function loadUserData() {
+    const savedData = localStorage.getItem('parisUserData');
+    if (savedData) {
+        const userData = JSON.parse(savedData);
+        
+        if (userData.name) document.getElementById('userName').value = userData.name;
+        if (userData.phone) document.getElementById('userPhone').value = userData.phone;
+        if (userData.street) document.getElementById('userStreet').value = userData.street;
+        if (userData.neighborhood) document.getElementById('userNeighborhood').value = userData.neighborhood;
+        if (userData.number) document.getElementById('userNumber').value = userData.number;
+    }
+}
+
+// Adicionar event listeners para salvar dados automaticamente quando o usuário digitar
+document.addEventListener('DOMContentLoaded', function() {
+    loadUserData();
+    
+    // Salvar dados quando o usuário sair dos campos
+    document.getElementById('userName').addEventListener('blur', saveUserData);
+    document.getElementById('userPhone').addEventListener('blur', saveUserData);
+    document.getElementById('userStreet').addEventListener('blur', saveUserData);
+    document.getElementById('userNeighborhood').addEventListener('blur', saveUserData);
+    document.getElementById('userNumber').addEventListener('blur', saveUserData);
+    
+    // Também salvar quando o usuário digitar (com delay para não sobrecarregar)
+    let saveTimeout;
+    ['userName', 'userPhone', 'userStreet', 'userNeighborhood', 'userNumber'].forEach(id => {
+        document.getElementById(id).addEventListener('input', function() {
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(saveUserData, 1000); // Salva após 1 segundo de inatividade
+        });
+    });
+});
     </script>
     </head>
     <body>
