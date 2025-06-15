@@ -1,0 +1,1034 @@
+<!-- Add Font Awesome CDN in the <head> section -->
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta property="og:title" content="DIPFOOD | Shawarma Food" />
+    <script>
+        // Função para bloquear o uso do Ctrl + U e outras teclas de desenvolvedor
+        document.addEventListener('keydown', function(event) {
+            // Bloquear Ctrl + U (visualizar código-fonte)
+            if (event.ctrlKey && event.key === 'u') {
+                event.preventDefault(); // Impede a ação padrão (abrir o código-fonte)
+                alert('Acesso ao código-fonte bloqueado!');
+            }
+
+            // Bloquear F12 (ferramentas de desenvolvedor)
+            if (event.key === 'F12') {
+                event.preventDefault(); // Impede a ação padrão
+                alert('Ferramentas de desenvolvedor bloqueadas!');
+            }
+
+            // Bloquear botão direito do mouse (para prevenir "Inspecionar" e "Ver código-fonte")
+            if (event.button === 2) {
+                event.preventDefault(); // Impede a ação padrão
+                alert('Clique direito desabilitado!');
+            }
+        });
+
+        // Impedir o uso da tecla F12 com evento 'contextmenu' (botão direito)
+        document.addEventListener('contextmenu', function(event) {
+            event.preventDefault(); // Impede o menu de contexto (botão direito)
+            alert('Clique direito desabilitado!');
+        });
+
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                const loadingScreen = document.getElementById('loading-screen');
+                loadingScreen.style.opacity = '0';
+                loadingScreen.style.transition = 'opacity 0.5s ease';
+                setTimeout(function() {
+                    loadingScreen.style.display = 'none';
+                }, 500);
+            }, 3000);
+        });
+
+        function isDrinkItem(item) {
+            // Check if the item exists in the drinks category
+            return menuItems.drinks.some(drink => drink.name === item.name);
+        }
+
+        let currentItem = null;
+        let currentCategory = 'all';
+
+function openAddonsModal(itemName, itemPrice) {
+    currentItem = { name: itemName, price: itemPrice };
+    populateAddonsModal();
+    document.getElementById('addons-modal').style.display = 'flex';
+    
+    // Reset all checkboxes
+    document.querySelectorAll('#addons-modal input[type="checkbox"]').forEach(checkbox => {
+        checkbox.checked = false;
+    });
+    
+    updateModalTotal();
+}
+
+function closeAddonsModal() {
+    document.getElementById('addons-modal').style.display = 'none';
+    currentItem = null;
+}
+
+function updateModalTotal() {
+    if (!currentItem) return;
+    
+    let total = currentItem.price;
+    const selectedAddons = Array.from(document.querySelectorAll('#addons-modal input[type="checkbox"]:checked'));
+    
+    selectedAddons.forEach(checkbox => {
+        total += parseFloat(checkbox.dataset.price);
+    });
+    
+    document.getElementById('modal-total').textContent = `Total: R$ ${total.toFixed(2)}`;
+}
+
+function populateAddonsModal() {
+    const addonsGrid = document.getElementById('addons-grid');
+    addonsGrid.innerHTML = '';
+    
+    addOns.forEach(addon => {
+        const addonElement = document.createElement('label');
+        addonElement.className = 'addon-option';
+        addonElement.innerHTML = `
+            <input type="checkbox" data-addon="${addon.name}" data-price="${addon.price}" onchange="updateModalTotal()">
+            <span>${addon.name} (+R$ ${addon.price.toFixed(2)})</span>
+        `;
+        addonsGrid.appendChild(addonElement);
+    });
+}
+
+function confirmAddons() {
+    if (!currentItem) return;
+    
+    const selectedAddons = Array.from(document.querySelectorAll('#addons-modal input[type="checkbox"]:checked')).map(checkbox => ({
+        name: checkbox.dataset.addon,
+        price: parseFloat(checkbox.dataset.price)
+    }));
+    
+    // Check if item with same name and addons already exists
+    const existingItemIndex = cart.findIndex(item => {
+        if (item.name !== currentItem.name) return false;
+        
+        // Compare addons
+        if ((!item.addons || item.addons.length === 0) && (!selectedAddons || selectedAddons.length === 0)) {
+            return true;
+        }
+        
+        if (!item.addons || !selectedAddons || item.addons.length !== selectedAddons.length) {
+            return false;
+        }
+        
+        // Sort both arrays by name for comparison
+        const sortedItemAddons = [...item.addons].sort((a, b) => a.name.localeCompare(b.name));
+        const sortedSelectedAddons = [...selectedAddons].sort((a, b) => a.name.localeCompare(b.name));
+        
+        return sortedItemAddons.every((addon, index) => 
+            addon.name === sortedSelectedAddons[index].name && 
+            addon.price === sortedSelectedAddons[index].price
+        );
+    });
+    
+    if (existingItemIndex !== -1) {
+        // Item exists, increment quantity
+        cart[existingItemIndex].quantity = (cart[existingItemIndex].quantity || 1) + 1;
+    } else {
+        // New item, add to cart
+        cart.push({
+            name: currentItem.name,
+            price: currentItem.price,
+            addons: selectedAddons,
+            quantity: 1
+        });
+    }
+    
+    updateCart();
+    closeAddonsModal();
+}
+
+function createMenuItem(item) {
+    return `
+        <div class="menu-item">
+            <h3>${item.name}</h3>
+            <p>${item.description}</p>
+            <div class="price">R$ ${item.price.toFixed(2)}</div>
+            <div class="item-buttons">
+                <button class="add-to-cart" onclick="addToCart('${item.name}', ${item.price}, this)">
+                    Adicionar ao Carrinho
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+function selectCategory(category) {
+    currentCategory = category;
+    
+    // Update active category button
+    document.querySelectorAll('.category-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    document.querySelector(`[data-category="${category}"]`).classList.add('active');
+    
+    // Show/hide menu sections
+    const allSections = document.querySelectorAll('.menu-section');
+    allSections.forEach(section => {
+        section.style.display = 'none';
+    });
+    
+    if (category === 'all') {
+        allSections.forEach(section => {
+            section.style.display = 'block';
+        });
+    } else {
+        const targetSection = document.getElementById(category + '-section') || document.getElementById(category);
+        if (targetSection) {
+            targetSection.style.display = 'block';
+        }
+    }
+}
+
+function saveUserData() {
+    const userData = {
+        name: document.getElementById('userName').value,
+        phone: document.getElementById('userPhone').value,
+        street: document.getElementById('userStreet').value,
+        neighborhood: document.getElementById('userNeighborhood').value,
+        number: document.getElementById('userNumber').value
+    };
+    
+    localStorage.setItem('parisUserData', JSON.stringify(userData));
+}
+
+function loadUserData() {
+    const savedData = localStorage.getItem('parisUserData');
+    if (savedData) {
+        const userData = JSON.parse(savedData);
+        
+        if (userData.name) document.getElementById('userName').value = userData.name;
+        if (userData.phone) document.getElementById('userPhone').value = userData.phone;
+        if (userData.street) document.getElementById('userStreet').value = userData.street;
+        if (userData.neighborhood) document.getElementById('userNeighborhood').value = userData.neighborhood;
+        if (userData.number) document.getElementById('userNumber').value = userData.number;
+    }
+}
+
+// Adicionar event listeners para salvar dados automaticamente quando o usuário digitar
+document.addEventListener('DOMContentLoaded', function() {
+    loadUserData();
+    
+    // Salvar dados quando o usuário sair dos campos
+    document.getElementById('userName').addEventListener('blur', saveUserData);
+    document.getElementById('userPhone').addEventListener('blur', saveUserData);
+    document.getElementById('userStreet').addEventListener('blur', saveUserData);
+    document.getElementById('userNeighborhood').addEventListener('blur', saveUserData);
+    document.getElementById('userNumber').addEventListener('blur', saveUserData);
+    
+    // Também salvar quando o usuário digitar (com delay para não sobrecarregar)
+    let saveTimeout;
+    ['userName', 'userPhone', 'userStreet', 'userNeighborhood', 'userNumber'].forEach(id => {
+        document.getElementById(id).addEventListener('input', function() {
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(saveUserData, 1000); // Salva após 1 segundo de inatividade
+        });
+    });
+});
+    </script>
+    </head>
+    <body>
+    <div id="loading-screen" style="
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+    ">
+        <div style="text-align: center;">
+            <img src="logo.png" 
+                 alt="Loading Logo" 
+                 style="width: 150px; height: auto; margin-bottom: 20px;">
+            <p style="color: #ff6b01; margin-top: 20px; font-size: 18px;">Carregando...</p>
+        </div>
+    </div>
+    
+    <div class="header">
+        <div>
+            <h1>Shawarma Food</h1>
+            <p style="font-size: 0.8rem; margin-top: 5px;">Nos Encontre: Av. Angela Blaso Segreto, 894 - Viva Mais, Novo Horizonte, SP</p>
+                <p style="font-size: 0.8rem; margin-top: 5px;"></p>
+                <i class="fas fa-phone"></i> (17)98822-1915 &nbsp;&nbsp; 
+                <i class="fas fa-phone"></i> (17)99167-3878
+        </div>
+    </div>
+    
+    <div id="store-status" class="store-status-container">
+    <!-- Status será inserido aqui via JavaScript -->
+</div>
+    <div class="container">
+        <div style="width: 100%; height: 200px; overflow: hidden; border-radius: 10px; margin-bottom:20px;">
+            <img src="banner.png" alt="Estabelecimento" style="width:100%;height:200px;object-fit:cover;">
+        </div>
+        
+        <div class="user-info">
+            <h2>Seus Dados</h2>
+            <input type="text" id="userName" placeholder="Seu Nome">
+            <input type="tel" id="userPhone" placeholder="Seu Telefone">
+            <div class="delivery-type">
+                <label>
+                    <input type="radio" name="deliveryType" value="pickup" checked=""> Retirada
+                </label>
+                <label>
+                    <input type="radio" name="deliveryType" value="delivery"> Entrega
+                </label>
+                <label style="display: flex; align-items: center; gap: 5px;">
+                    <input type="radio" name="deliveryType" value="dineIn">
+                    Mesa
+                </label>
+            </div>
+            <div id="addressField">
+                <input type="text" id="userStreet" placeholder="Nome da Rua">
+                <input type="text" id="userNeighborhood" placeholder="Bairro">
+                <input type="text" id="userNumber" placeholder="Número da Casa">
+            </div>
+
+            <!-- New observation field -->
+            <div class="observation-field">
+                <h3>Observações do Pedido</h3>
+                <textarea id="orderObservation" placeholder="Alguma observação para seu pedido? Ex: Sem cebola, bem passado, etc." rows="3"></textarea>
+            </div>
+
+            <div class="payment-type">
+                <h3 style="color: white;">Forma de Pagamento</h3>
+                <div class="payment-options">
+                    <label>
+                        <input type="radio" name="paymentType" value="debit" checked>
+                        Cartão
+                    </label>
+                    <label>
+                        <input type="radio" name="paymentType" value="credit">
+                        Voucher
+                    </label>
+                    <label>
+                        <input type="radio" name="paymentType" value="money">
+                        Dinheiro
+                    </label>
+                    <label>
+                        <input type="radio" name="paymentType" value="pix">
+                        PIX
+                    </label>
+                </div>
+                <div id="pixField" style="display: none;">
+                    <p style="color: white;">Chave PIX CNPJ: 31393521000180</p>
+                </div>
+                <div id="changeField" style="display: none;">
+                    <input type="number" id="changeAmount" placeholder="Troco Para Quanto?">
+                </div>
+            </div>
+        </div>
+
+        <!-- Category Selector -->
+        <div class="category-selector">
+            <div class="category-scroll">
+                <button class="category-btn active" data-category="all" onclick="selectCategory('all')">
+                    <i class="fas fa-th-large"></i>
+                    <span>Todos</span>
+                </button>
+                <button class="category-btn" data-category="sandwiches" onclick="selectCategory('sandwiches')">
+                    <i class="fas fa-bread-slice"></i>
+                    <span>Salgados</span>
+                </button>
+                <button class="category-btn" data-category="diverse" onclick="selectCategory('diverse')">
+                    <i class="fas fa-cookie-bite"></i>
+                    <span>Doces</span>
+                </button>
+                <button class="category-btn" data-category="frango" onclick="selectCategory('frango')">
+                    <i class="fas fa-hamburger"></i>
+                    <span>Hamburguer</span>
+                </button>
+                <button class="category-btn" data-category="drinks" onclick="selectCategory('drinks')">
+                    <i class="fas fa-glass-cheers"></i>
+                    <span>Bebidas</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="menu-section" id="sandwiches">
+            <h2>Salgados</h2>
+            <div class="menu-grid" id="sandwiches-grid"></div>
+        </div>
+
+        <div class="menu-section" id="diverse-section">
+            <h2>Doces</h2>
+            <div class="menu-grid" id="diverse"></div>
+        </div>
+
+        <div class="menu-section" id="frango-section">
+            <h2>Hamburguer</h2>
+            <div class="menu-grid" id="frango"></div>
+        </div>
+
+        <div class="menu-section" id="drinks-section">
+            <h2>Bebidas</h2>
+            <div class="menu-grid" id="drinks"></div>
+        </div>
+
+        <div style="text-align: center; padding: 20px 0 40px 0;">
+            <a href="#" style="
+                display: inline-block;
+                background-color: var(--primary);
+                color: white;
+                padding: 15px 30px;
+                border-radius: 8px;
+                text-decoration: none;
+                font-weight: bold;
+                margin-top: 20px;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+                transition: all 0.3s ease;
+            ">
+                Voltar ao Topo
+            </a>
+        </div>
+    </div>
+    
+    <div class="cart" id="cart">
+        <h2>Carrinho</h2>
+        <div id="cart-items"></div>
+        <div id="cart-total">Total: R$ 0.00</div>
+        <div class="cart-buttons">
+            <button class="checkout-btn" onclick="checkout()">Finalizar Pedido</button>
+        </div>
+    </div>
+    
+    <script>
+    let orderCounter = 0;
+
+    async function loadOrderCounter() {
+        try {
+            const response = await fetch('/orderCounter.txt');
+            if (response.ok) {
+                const count = await response.text();
+                orderCounter = parseInt(count) || 0;
+            }
+        } catch (error) {
+            console.log('Could not load counter, starting from 0');
+            orderCounter = 0;
+        }
+    }
+
+    async function saveOrderCounter() {
+        try {
+            const response = await fetch('/saveCounter', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ counter: orderCounter })
+            });
+            
+            if (!response.ok) {
+                console.error('Failed to save counter');
+            }
+        } catch (error) {
+            console.error('Error saving counter:', error);
+        }
+    }
+
+    const addOns = [
+            { name: "Catupiry Original", price: 6.00 },
+            { name: "Cheddar da Catupiry", price: 6.00 },
+            { name: "Requeijão Scala", price: 6.00 },
+            { name: "Cheddar Scala", price: 6.00 },
+            { name: "Cream Cheese da Catupiry", price: 6.00 },
+            { name: "Mussarela", price: 6.00 },
+            { name: "Queijo no Prato", price: 6.00 },
+            { name: "Alcatra", price: 5.00 },
+            { name: "Bacon", price: 5.00 },
+            { name: "Atum", price: 4.00 },
+            { name: "Presunto", price: 3.00 },
+            { name: "Calabresa", price: 4.00 },
+            { name: "Frango", price: 4.00 },
+            { name: "Salsicha", price: 3.00 },
+            { name: "Pernil", price: 4.00 },
+            { name: "Anéis de Cebola Empanado", price: 3.00 },
+            { name: "Batata Frita", price: 3.00 },
+            { name: "Brócolis", price: 3.00 },
+            { name: "Batata Palha", price: 2.00 },
+            { name: "Palmito Picado", price: 2.00 },
+            { name: "Molho Barbecue", price: 2.00 },
+            { name: "Alface", price: 2.00 },
+            { name: "Milho", price: 2.00 },
+            { name: "Ervilha Fresca", price: 2.00 },
+            { name: "Azeitona Verde Fatiada", price: 2.00 },
+            { name: "Ovo Cozido", price: 2.00 },
+            { name: "Tomate", price: 2.00 },
+            { name: "Cebola grelhada no Shoyo", price: 2.00 },
+            { name: "Cebola grelhada no Azeite", price: 2.00 },
+        ];
+        const menuItems = {
+            sandwiches: [
+                { name: "Frango Desfiado", price: 27.00, description: "Creme de limão, alface, tomate, cebola grelhada no shoyu, picles, molho barbecue, batata frita e frango desfiado com tempero da casa." },
+                { name: "Frango em Cubos", price: 27.00, description: "Creme de limão, alface, tomate, cebola grelhada no shoyu, picles, molho barbecue, batata frita e frango." },
+                { name: "Shawarma Filé de Frango Empanado", price: 30.00, description: "Creme de limão, alface, tomate, cebola grelhada no shoyu, picles, molho barbecue, filé de peito de frango empanado e batata frita." },
+                { name: "Alcatra", price: 37.00, description: "Creme de limão, alface, tomate, cebola grelhada no shoyu, picles, molho barbecue, batata frita e alcatra." },
+                { name: "Alcatra com Frango", price: 31.00, description: "Creme de limão, alface, tomate, cebola grelhada no shoyu, picles, molho barbecue, batata frita, alcatra e frango." },
+                { name: "Alcatra com Calabresa", price: 30.00, description: "Creme de limão, alface, tomate, cebola grelhada no shoyu, picles, molho barbecue, batata frita, alcatra e calabresa." },
+                { name: "Frango com Calabresa", price: 29.00, description: "Creme de limão, alface, tomate, cebola grelhada no shoyu, picles, molho barbecue, batata frita, frango e calabresa." },
+                { name: "Brócolis com Bacon", price: 32.00, description: "Creme de limão, cebola grelhada no shoyu, molho barbecue, batata frita, brócolis, bacon e requeijão." },
+                { name: "Pizza", price: 32.00, description: "Molho barbecue, presunto, mussarela, tomate, orégano, batata frita e requeijão." },
+                { name: "4 Queijos", price: 37.00, description: "Creme de limão, tomate, cebola grelhada no shoyu, batata frita, cheddar, requeijão, mussarela, queijo prato e orégano." },
+                { name: "Calabresa com Requeijão", price: 28.00, description: "Creme de limão, alface, tomate, cebola grelhada no shoyu, picles, molho barbecue, batata frita, calabresa e requeijão." },
+                { name: "Pernil com Requeijão", price: 30.00, description: "Creme de limão, tomate, cebola grelhada no shoyu, molho barbecue, batata frita, pernil e requeijão." },
+                { name: "Kafta com Mussarela", price: 29.00, description: "Creme de limão, alface, tomate, cebola grelhada no shoyu, molho barbecue, batata frita, 2 kaftas e mussarela." },
+                { name: "Bacon com Requeijão", price: 37.00, description: "Creme de limão, alface, tomate, anéis de cebola empanado, molho barbecue, bacon e requeijão." },
+                { name: "HOT DOG", price: 19.00, description: "Molho barbecue, 2 salsichas, milho, batata palha, molho de tomate Heinz e mussarela." },
+                { name: "PORTUGUESA", price: 25.00, description: "Molho barbecue, tomate, milho, ervilha fresca, azeitona verde fatiada, cebola grelhada no azeite, ovo cozido, palmito, orégano, mussarela e batata frita." },
+                { name: "ATUM", price: 26.00, description: "Creme de limão, alface, tomate, cebola grelhada no shoyu, molho barbecue, atum, batata frita e mussarela." },
+                { name: "VEGETARIANO", price: 24.00, description: "Creme de limão, alface, tomate, cebola grelhada no shoyu, picles, molho barbecue, batata frita e mussarela." },
+                { name: "FILÉ DE PEIXE EMPANADO", price: 24.00, description: "Creme de limão, alface, tomate, cebola grelhada no shoyu, picles, molho barbecue, batata frita e filé de peixe empanado." },
+                { name: "Shawarma Burguer", price: 19.00, description: "Creme de limão, 2 hambúrgueres 90g, 4 fatias de queijo prato, molho barbecue e batata frita." },
+                { name: "Shawarma Burguer Salada", price: 20.00, description: "Creme de limão, alface, tomate, cebola grelhada no shoyu, picles, 2 hambúrgueres 90g, molho barbecue e batata frita." },
+                { name: "Shawarma Egg Salada", price: 21.00, description: "Creme de limão, alface, tomate, cebola grelhada no shoyu, picles, 1 hambúrguer 90g, 1 ovo frio, 2 fatias queijo prato, molho barbecue e batata frita." },
+                { name: "Camarão", price: 45.00, description: "Creme de limão, alface, tomate, cebola grelhada no shoyu, picles, batata frita, molho barbecue, cream cheese e camarão empanado." },
+                { name: "Shawarma Bolinho de Bacalhau", price: 45.00, description: "Creme de limão, alface, tomate, cebola grelhada no shoyu, picles, molho barbecue, batata frita, 4 bolinhos de bacalhau." }
+            ],
+            diverse: [
+            { name: "Chocolate ao Leite com Morango", price: 18.00, description: "Chocolate ao leite e morango fatiado." },
+            { name: "Chocolate ao Leite com Banana", price: 14.00, description: "Chocolate ao leite e banana fatiada." },
+            { name: "Chocolate ao Leite com Amendoim", price: 14.00, description: "Chocolate ao leite e amendoim torrado e triturado." },
+            { name: "Chocolate ao Leite", price: 13.00, description: "Chocolate ao leite." },
+            { name: "Chocolate Branco com Morango", price: 18.00, description: "Chocolate branco e morango fatiado." },
+            { name: "Chocolate Branco", price: 13.00, description: "Chocolate branco." },
+            { name: "Doce de Leite com Amendoim", price: 14.00, description: "Doce de leite e amendoim torrado e triturado." },
+            { name: "Doce de Leite", price: 13.00, description: "Doce de leite." },
+            { name: "Creme de Leite Ninho", price: 16.00, description: "Creme de leite Ninho." },
+            { name: "Bis", price: 15.00, description: "Chocolate e Bis." },
+            { name: "Bis Oreo", price: 15.00, description: "Chocolate e Bis Oreo." },
+            { name: "Tortuguita", price: 15.00, description: "Chocolate e Tortuguita Trio." },
+            { name: "Romeu e Julieta", price: 15.00, description: "Goiabada cremosa e requeijão." },
+            { name: "Shawarma M&Ms", price: 18.00, description: "Chocolate ao leite com M&Ms." },
+            { name: "Shawarma Kit Kat", price: 18.00, description: "Chocolate ao leite com Kit Kat." },
+            { name: "Shawarma Ouro Branco", price: 18.00, description: "Chocolate ao leite com bombons Ouro Branco." }
+            ],
+           frango: [
+            { "name": "X-Burguer", "price": 18.00, "description": "Pão Big, hambúrguer 150g artesanal, queijo prato, tomate" },
+            { "name": "X-Burguer Salada", "price": 19.00, "description": "Pão Big, hambúrguer 150g artesanal, queijo prato, tomate e alface" },
+            { "name": "X-Salada", "price": 20.00, "description": "Pão Big, hambúrguer 150g artesanal, alface, tomate, cebola grelhada no azeite, picles e maionese verde" },
+            { "name": "X-Egg", "price": 21.00, "description": "Pão Big, hambúrguer 150g artesanal, queijo prato, presunto, tomate e ovo" },
+            { "name": "X-Egg Salada Milho", "price": 23.00, "description": "Pão Big, hambúrguer 150g artesanal, queijo prato, presunto, tomate, alface, milho e ovo" },
+            { "name": "X-Bacon", "price": 25.00, "description": "Pão Big, hambúrguer 150g artesanal, queijo mussarela, tomate e bacon" },
+            { "name": "X-Tudo", "price": 29.00, "description": "Pão Big, hambúrguer 150g artesanal, queijo prato, presunto, calabresa Sadia, bacon, tomate, alface, milho e ovo" },
+            { "name": "X-A Moda da Casa", "price": 40.00, "description": "Pão Big, alcatra em tiras, frango em cubos, queijo prato, presunto, milho, tomate, cebola grelhada no azeite e maionese verde" },
+            { "name": "X-Frango", "price": 27.00, "description": "Pão Big, frango em cubos, alface, tomate, cebola grelhada no azeite, queijo mussarela, presunto e maionese verde" },
+            { "name": "X-Bauru Alcatra", "price": 37.00, "description": "Pão Big Francês, alcatra, tomate, cebola grelhada no azeite, queijo mussarela e maionese verde" },
+            { "name": "X-Bauru Pernil", "price": 30.00, "description": "Pão Big Francês, pernil desfiado, tomate, cebola grelhada no azeite, molho barbecue e requeijão Scala" }
+            ],
+           carne: [
+            { name: "X-Bauru", price: 22.00, description: "Pão, carne, queijo, tomate, maionese da casa" },
+            { name: "X-Bauru Bacon", price: 25.00, description: "Pão, carne, bacon, queijo, tomate, maionese da casa" },
+            { name: "X-Bauru Catupiry", price: 25.00, description: "Pão, carne, catupiry, queijo, tomate, maionese da casa" }
+            ],
+           dog: [
+            { name: "Hot Dog Quente", price: 10.00, description: "Pão, 2 salsichas, maionese, catchup, mostarda, batata palha" },
+            { name: "Hot Dog Bacon", price: 17.00, description: "Pão, 2 salsichas, maionese, catchup, mostarda, bacon, batata palha" },
+            { name: "Hot Dog Completo", price: 19.00, description: "Pão, 2 salsichas, maionese, catchup, mostarda, tomate, bacon, catupiry, batata palha" }
+            ],
+            drinks: [
+            { name: "Suco Del Valle Uva/Pêssego Lata 290ml", price: 5.00, description: "" },
+            { name: "Suco Del Valle Frut Laranja/Uva 450ml", price: 6.00, description: "" },
+            { name: "Suco Life Uva/Laranja/Cajú 900ml", price: 14.00, description: "" },
+            { name: "Suco Del Valle Frut Laranja/Uva 1 Litro", price: 7.50, description: "" },
+            { name: "Suco Kapo Uva/Morango 200ml", price: 4.00, description: "" },
+            { name: "Suco Polpa Copo Abacaxi 500ml", price: 10.00, description: "" },
+            { name: "Suco Polpa Copo Abacaxi com Hortelã 500ml", price: 10.00, description: "" },
+            { name: "Suco Polpa Copo Maracujá 500ml", price: 11.00, description: "" },
+            { name: "Coca-Cola Pet 200ml", price: 3.00, description: "" },
+            { name: "Coca-Cola Lata 350ml", price: 6.00, description: "" },
+            { name: "Coca-Cola Zero Lata 350ml", price: 6.00, description: "" },
+            { name: "Coca-Cola 600ml", price: 7.00, description: "" },
+            { name: "Coca-Cola Zero 600ml", price: 7.00, description: "" },
+            { name: "Coca-Cola 1 Litro", price: 9.00, description: "" },
+            { name: "Coca-Cola Zero 1 Litro", price: 9.00, description: "" },
+            { name: "Coca-Cola 2 Litros", price: 15.00, description: "" },
+            { name: "Coca-Cola Zero 2 Litros", price: 15.00, description: "" },
+            { name: "Fanta Laranja Lata 350ml", price: 5.50, description: "" },
+            { name: "Fanta Laranja 2 Litros", price: 15.00, description: "" },
+            { name: "Fanta Uva Lata 350ml", price: 5.50, description: "" },
+            { name: "Fanta Uva 2 Litros", price: 15.00, description: "" },
+            { name: "Sprite Lata 350ml", price: 5.50, description: "" },
+            { name: "Sprite 2 Litros", price: 15.00, description: "" },
+            { name: "Sprite Lemon Fresh 510ml", price: 6.50, description: "" },
+            { name: "Schweppes Citrus Lata 350ml", price: 5.50, description: "" },
+            { name: "H2O Limão 500ml", price: 7.00, description: "" },
+            { name: "H2O Limoneto 500ml", price: 7.00, description: "" },
+            { name: "Guaraná Antarctica Lata 350ml", price: 6.00, description: "" },
+            { name: "Guaraná Antarctica 1 Litro", price: 9.00, description: "" },
+            { name: "Guaraná Antarctica 2 Litros", price: 15.00, description: "" },
+            { name: "Kuat Lata 350ml", price: 5.50, description: "" },
+            { name: "Kuat 2 Litros", price: 15.00, description: "" },
+            { name: "Roller 2 Litros", price: 10.00, description: "" },
+            { name: "Poty 2 Litros", price: 10.00, description: "" },
+            { name: "Pepsi 2 Litros", price: 15.00, description: "" },
+            { name: "Água sem Gás", price: 3.50, description: "" },
+            { name: "Água com Gás", price: 4.00, description: "" }
+            ]
+        };
+    
+// Sistema de Horário de Funcionamento
+const storeHours = {
+    // Dias da semana: 0 = Domingo, 1 = Segunda, 2 = Terça, etc.
+    0: { open: true, start: "18:00", end: "23:30" }, // Domingo - Fechado
+    1: { open: true, start: "18:00", end: "23:30" }, // Segunda
+    2: { open: true, start: "18:00", end: "23:30" }, // Terça
+    3: { open: true, start: "18:00", end: "23:30" }, // Quarta
+    4: { open: true, start: "18:00", end: "23:30" }, // Quinta
+    5: { open: true, start: "18:00", end: "23:30" }, // Sexta
+    6: { open: true, start: "18:00", end: "23:30" }  // Sábado
+};
+
+function isStoreOpen() {
+  const now = new Date();
+  const currentDay = now.getDay();
+  const currentHour = now.getHours();
+  const currentMinute = now.getMinutes();
+  const currentTimeInMinutes = currentHour * 60 + currentMinute;
+  
+  const todayHours = storeHours[currentDay];
+  
+  // Se não abre hoje
+  if (!todayHours || !todayHours.open) {
+      return false;
+  }
+  
+  // Converter horários de abertura e fechamento para minutos
+  const [startHour, startMinute] = todayHours.start.split(':').map(Number);
+  const [endHour, endMinute] = todayHours.end.split(':').map(Number);
+  
+  const startTimeInMinutes = startHour * 60 + startMinute;
+  const endTimeInMinutes = endHour * 60 + endMinute;
+  
+  // Verificar se está dentro do horário
+  return currentTimeInMinutes >= startTimeInMinutes && currentTimeInMinutes <= endTimeInMinutes;
+}
+
+function getNextOpeningDate() {
+  const now = new Date();
+  const currentDay = now.getDay();
+  const currentHour = now.getHours();
+  const currentMinute = now.getMinutes();
+  const currentTimeInMinutes = currentHour * 60 + currentMinute;
+  
+  // Verificar se ainda pode abrir hoje
+  const todayHours = storeHours[currentDay];
+  if (todayHours && todayHours.open) {
+      const [startHour, startMinute] = todayHours.start.split(':').map(Number);
+      const startTimeInMinutes = startHour * 60 + startMinute;
+      
+      if (currentTimeInMinutes < startTimeInMinutes) {
+          // Ainda vai abrir hoje
+          return `Hoje às ${todayHours.start}`;
+      }
+  }
+  
+  // Procurar próximo dia que abre
+  for (let i = 1; i <= 7; i++) {
+      const checkDay = (currentDay + i) % 7;
+      if (storeHours[checkDay] && storeHours[checkDay].open) {
+          const nextDate = new Date();
+          nextDate.setDate(nextDate.getDate() + i);
+          
+          const dayNames = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+          const dayName = dayNames[checkDay];
+          const dateStr = nextDate.toLocaleDateString('pt-BR');
+          
+          if (i === 1) {
+              return `Amanhã (${dayName}) às ${storeHours[checkDay].start}`;
+          } else if (i <= 6) {
+              return `${dayName} (${dateStr}) às ${storeHours[checkDay].start}`;
+          } else {
+              return `${dateStr} às ${storeHours[checkDay].start}`;
+          }
+      }
+  }
+  
+  return 'Em breve';
+}
+
+function updateStoreStatus() {
+  const status = getStoreStatus();
+  console.log('Store status:', status); // Para debug
+  
+  const statusElement = document.getElementById('store-status');
+  
+  if (statusElement) {
+        if (status.isOpen) {
+            // Quando aberto, esconde o status
+            statusElement.style.display = 'none';
+        } else {
+            // Quando fechado, mostra o status
+            statusElement.style.display = 'block';
+            statusElement.innerHTML = `
+                <div class="status-indicator closed">
+                    <i class="fas fa-times-circle"></i>
+                    ${status.message}
+                </div>
+            `;
+        }
+    }
+    
+    // Desabilitar/habilitar botões de adicionar ao carrinho
+    const addToCartButtons = document.querySelectorAll('.add-to-cart');
+    const checkoutButton = document.querySelector('.checkout-btn');
+    
+    addToCartButtons.forEach(button => {
+        if (!status.isOpen) {
+            button.disabled = true;
+            button.textContent = 'Fechado';
+            button.style.backgroundColor = '#666';
+            button.style.cursor = 'not-allowed';
+        } else {
+            button.disabled = false;
+            button.textContent = 'Adicionar ao Carrinho';
+            button.style.backgroundColor = 'var(--botoesred)';
+            button.style.cursor = 'pointer';
+        }
+    });
+    
+    if (checkoutButton) {
+        if (!status.isOpen) {
+            checkoutButton.disabled = true;
+            checkoutButton.textContent = 'Loja Fechada';
+            checkoutButton.style.backgroundColor = '#666';
+            checkoutButton.style.cursor = 'not-allowed';
+        } else {
+            checkoutButton.disabled = false;
+            checkoutButton.textContent = 'Finalizar Pedido';
+            checkoutButton.style.backgroundColor = 'white';
+            checkoutButton.style.cursor = 'pointer';
+        }
+    }
+}
+    
+    let cart = [];
+    let deliveryFee = 0;
+    
+    function displayMenuItemsUpdate() {
+        Object.keys(menuItems).forEach(category => {
+            let container;
+            if (category === 'sandwiches') {
+                container = document.getElementById('sandwiches-grid');
+            } else {
+                container = document.getElementById(category);
+            }
+            
+            if (container) {
+                menuItems[category].forEach(item => {
+                    container.innerHTML += createMenuItem(item);
+                });
+            }
+        });
+    }
+    
+    function addToCart(name, price, buttonElement) {
+        // For drinks, add directly to cart without showing addons modal
+        if (isDrinkItem({ name: name })) {
+            // Check if item already exists
+            const existingItemIndex = cart.findIndex(item => item.name === name && (!item.addons || item.addons.length === 0));
+            
+            if (existingItemIndex !== -1) {
+                cart[existingItemIndex].quantity = (cart[existingItemIndex].quantity || 1) + 1;
+            } else {
+                cart.push({
+                    name: name,
+                    price: price,
+                    addons: [],
+                    quantity: 1
+                });
+            }
+            
+            updateCart();
+        } else {
+            // For food items, show addons modal
+            openAddonsModal(name, price);
+        }
+    }
+    
+    function updateCart() {
+    const cartItems = document.getElementById('cart-items');
+    const cartTotal = document.getElementById('cart-total');
+    let total = 0;
+
+    cartItems.innerHTML = '';
+    cart.forEach((item, index) => {
+        let itemTotal = item.price;
+        let addonsText = '';
+        const quantity = item.quantity || 1;
+        
+        if (item.addons && item.addons.length > 0) {
+            addonsText = '<div class="cart-item-addons">';
+            item.addons.forEach(addon => {
+                itemTotal += addon.price;
+                addonsText += `<div>+ ${addon.name} (R$ ${addon.price.toFixed(2)})</div>`;
+            });
+            addonsText += '</div>';
+        }
+        
+        const totalItemPrice = itemTotal * quantity;
+        total += totalItemPrice;
+        
+        cartItems.innerHTML += `
+            <div class="cart-item">
+                <div>
+                    <span>${quantity}x ${item.name}</span>
+                    ${addonsText}
+                </div>
+                <span>R$ ${totalItemPrice.toFixed(2)}</span>
+                <div class="cart-item-controls">
+                    <button onclick="decreaseQuantity(${index})">-</button>
+                    <button onclick="removeFromCart(${index})">X</button>
+                </div>
+            </div>
+        `;
+    });
+
+    const deliveryType = document.querySelector('input[name="deliveryType"]:checked').value;
+    if (deliveryType === 'delivery') {
+        deliveryFee = 6.00;
+        cartItems.innerHTML += `
+            <div class="cart-item">
+                <span>Taxa de Entrega</span>
+                <span>R$ ${deliveryFee.toFixed(2)}</span>
+            </div>
+        `;
+        total += deliveryFee;
+    } else {
+        deliveryFee = 0;
+    }
+
+    cartTotal.innerHTML = `Total: R$ ${total.toFixed(2)}`;
+    
+    // Trigger change recalculation
+    const changeAmount = document.getElementById('changeAmount');
+    if (changeAmount && changeAmount.value) {
+        updateChangeDisplay(total);
+    }
+}
+    
+    function removeFromCart(index) {
+        cart.splice(index, 1);
+        updateCart();
+    }
+    
+    function decreaseQuantity(index) {
+    if (cart[index].quantity > 1) {
+        cart[index].quantity--;
+    } else {
+        cart.splice(index, 1);
+    }
+    updateCart();
+}
+    
+    document.querySelectorAll('input[name="deliveryType"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            const addressField = document.getElementById('addressField');
+            if (this.value === 'delivery') {
+                addressField.classList.add('show');
+            } else {
+                addressField.classList.remove('show');
+            }
+            updateCart();
+        });
+    });
+    
+    document.querySelectorAll('input[name="paymentType"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            const pixField = document.getElementById('pixField');
+            const changeField = document.getElementById('changeField');
+            
+            pixField.style.display = this.value === 'pix' ? 'block' : 'none';
+            changeField.style.display = this.value === 'money' ? 'block' : 'none';
+        });
+    });
+    
+    function calculateChange(total, amountGiven) {
+        if (amountGiven < total) {
+            return null;
+        }
+        return amountGiven - total;
+    }
+
+    document.getElementById('changeAmount').addEventListener('input', function() {
+        const cartTotal = cart.reduce((sum, item) => {
+        let itemTotal = item.price;
+        const quantity = item.quantity || 1;
+        if (item.addons) {
+            itemTotal += item.addons.reduce((addonSum, addon) => addonSum + addon.price, 0);
+        }
+        return sum + (itemTotal * quantity);
+    }, 0) + deliveryFee;
+
+        updateChangeDisplay(cartTotal);
+    });
+    
+    function checkout() {
+        // Increment order counter and save cart-total
+        orderCounter++;
+        saveOrderCounter();
+        
+        const name = document.getElementById('userName').value;
+        const phone = document.getElementById('userPhone').value;
+        const deliveryType = document.querySelector('input[name="deliveryType"]:checked').value;
+        const street = document.getElementById('userStreet').value;
+        const neighborhood = document.getElementById('userNeighborhood').value;
+        const number = document.getElementById('userNumber').value;
+        const paymentType = document.querySelector('input[name="paymentType"]:checked').value;
+        const observation = document.getElementById('orderObservation').value.trim();
+        
+        if (!name || !phone) {
+            alert('Por favor, preencha seu nome e telefone antes de finalizar o pedido.');
+            return;
+        }
+
+        let totalProdutos = cart.reduce((total, item) => {
+        let itemTotal = item.price;
+        const quantity = item.quantity || 1;
+        if (item.addons && item.addons.length > 0) {
+            itemTotal += item.addons.reduce((addonSum, addon) => addonSum + addon.price, 0);
+        }
+        return total + (itemTotal * quantity);
+    }, 0);
+
+        if (totalProdutos < 7) {
+            alert("Seu Carrinho está vazio, Adicione Pedidos para Realizar o pedido!");
+            return;
+        }
+        if (deliveryType === 'delivery' && (!street || !neighborhood || !number)) {
+            alert('Por favor, preencha todos os campos do endereço para entrega.');
+            return;
+        }
+
+        // Get current date and time
+        const now = new Date();
+        const dateStr = now.toLocaleDateString();
+        const timeStr = now.toLocaleTimeString();
+
+        let message = `🔔 *Pedido #${orderCounter}* (${dateStr} - ${timeStr})\n`;
+        message += `------------------------\n`;
+        
+        let subTotal = 0;
+
+        // List items
+        cart.forEach(item => {
+        let itemTotal = item.price;
+        const quantity = item.quantity || 1;
+        
+        message += `*${quantity}x ${item.name}*\n`;
+        
+        if (item.addons && item.addons.length > 0) {
+            item.addons.forEach(addon => {
+                message += `   • ${addon.name} (+R$ ${addon.price.toFixed(2)})\n`;
+                itemTotal += addon.price;
+            });
+        }
+        
+        const totalItemPrice = itemTotal * quantity;
+        message += `*Valor:* R$ ${totalItemPrice.toFixed(2)}\n`;
+        message += `------------------------\n`;
+        subTotal += totalItemPrice;
+    });
+
+        let total = subTotal;
+        
+        message += `*Sub Total:* R$ ${subTotal.toFixed(2)}\n`;
+        
+        if (deliveryType === 'delivery') {
+            total += deliveryFee;
+            message += `*Taxa de Entrega:* R$ ${deliveryFee.toFixed(2)}\n`;
+        }
+        
+        message += `*Total:* R$ ${total.toFixed(2)}\n`;
+        message += `*Forma de pagto:* ${
+            paymentType === 'money' ? 'Dinheiro' :
+            paymentType === 'debit' ? 'Cartão' :
+            paymentType === 'credit' ? 'Voucher' :
+            'PIX'
+        }\n`;
+        
+        if (paymentType === 'money') {
+            const changeAmount = document.getElementById('changeAmount').value;
+            if (changeAmount) {
+                const change = calculateChange(total, parseFloat(changeAmount));
+                message += `*Troco para:* R$ ${parseFloat(changeAmount).toFixed(2)}\n`;
+                message += `*Troco a devolver:* R$ ${change.toFixed(2)}\n`;
+            }
+        }
+
+        // Include observation in the message
+        if (observation) {
+            message += `\n📝 *Observações:*\n${observation}\n`;
+        }
+        
+        message += `------------------------\n`;
+        message += `*Tipo:* ${
+            deliveryType === 'delivery' ? 'Entrega' : 
+            deliveryType === 'dineIn' ? 'Comer No Local' : 
+            'Retirada'
+        }\n`;
+    
+        if (deliveryType === 'delivery') {
+            message += `*Endereço:* ${street}, ${number} - ${neighborhood}\n`;
+        }
+        message += `\n👤 *Cliente:* ${name}\n`;
+        message += `📲 *Telefone:* ${phone}`;
+        
+        const encodedMessage = encodeURIComponent(message);
+        window.open(`https://wa.me/5517988221915?text=${encodedMessage}`);
+    }
+    
+    displayMenuItemsUpdate();
+    document.addEventListener('DOMContentLoaded', loadOrderCounter);
+    populateAddonsModal();
+
+// Atualizar status quando a página carregar
+document.addEventListener('DOMContentLoaded', function() {
+    updateStoreStatus();
+    // Atualizar status a cada minuto
+    setInterval(updateStoreStatus, 60000);
+});
+
+// Modificar a função checkout para verificar se está aberto
+const originalCheckout = checkout;
+checkout = function() {
+    if (!isStoreOpen()) {
+        alert('Desculpe, estamos fechados no momento. Confira nossos horários de funcionamento.');
+        return;
+    }
+    originalCheckout();
+};
+    </script>
+    
+    <!-- Addons Modal -->
+<div id="addons-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Escolha seus Extras</h3>
+            <button class="close-btn" onclick="closeAddonsModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="addons-grid" id="addons-grid">
+    <!-- Addons will be dynamically generated here -->
+</div>
+        </div>
+        <div class="modal-footer">
+            <div id="modal-total" class="modal-total">Total: R$ 0.00</div>
+            <div class="modal-buttons">
+                <button class="cancel-btn" onclick="closeAddonsModal()">Cancelar</button>
+                <button class="confirm-btn" onclick="confirmAddons()">Adicionar ao Carrinho</button>
+            </div>
+        </div>
+    </div>
+</div>
+    </body></html>
