@@ -1,4 +1,8 @@
-<!-- Add Font Awesome CDN in the <head> section -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <title>DIPFOOD | Paris Burger</title>
+    <!-- Add Font Awesome CDN in the <head> section -->
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <meta charset="UTF-8">
@@ -248,7 +252,7 @@ document.addEventListener('DOMContentLoaded', function() {
         z-index: 9999;
     ">
         <div style="text-align: center;">
-            <img src="logo.png" 
+            <img src="/placeholder.svg?height=150&width=150" 
                  alt="Loading Logo" 
                  style="width: 150px; height: auto; margin-bottom: 20px;">
             <p style="color: #ff6b01; margin-top: 20px; font-size: 18px;">Carregando...</p>
@@ -267,7 +271,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     <div class="container">
         <div style="width: 100%; height: 200px; overflow: hidden; border-radius: 10px; margin-bottom:20px;">
-            <img src="banner.png" alt="Estabelecimento" style="width:100%;height:200px;object-fit:cover;">
+            <img src="/placeholder.svg?height=200&width=400" alt="Estabelecimento" style="width:100%;height:200px;object-fit:cover;">
         </div>
         <div class="user-info">
             <h2>Seus Dados</h2>
@@ -318,7 +322,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     </label>
                 </div>
                 <div id="pixField" style="display: none;">
-                    <p style="color: white;">Chave PIX: (17)996232492</p>
+                    <div style="display: flex; align-items: center; gap: 10px; background: rgba(0, 0, 0, 0.8); padding: 15px; border-radius: 8px;">
+                        <p style="color: white; margin: 0; flex: 1;">Chave PIX: (17)996232492</p>
+                        <button onclick="copyPixKey()" style="background-color: var(--botoesred); color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; white-space: nowrap;">
+                            📋 Copiar
+                        </button>
+                    </div>
                 </div>
                 <div id="changeField" style="display: none;">
                     <input type="number" id="changeAmount" placeholder="Troco Para Quanto?">
@@ -812,6 +821,45 @@ document.addEventListener('DOMContentLoaded', function() {
     displayMenuItemsUpdate();
     document.addEventListener('DOMContentLoaded', loadOrderCounter);
     populateAddonsModal();
+
+function copyPixKey() {
+    const pixKey = "(17)996232492";
+    
+    // Tentar usar a API moderna do clipboard
+    if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(pixKey).then(() => {
+            alert('Chave PIX copiada!');
+        }).catch(() => {
+            // Fallback se a API moderna falhar
+            fallbackCopyTextToClipboard(pixKey);
+        });
+    } else {
+        // Fallback para navegadores mais antigos
+        fallbackCopyTextToClipboard(pixKey);
+    }
+}
+
+function fallbackCopyTextToClipboard(text) {
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    textArea.style.top = "0";
+    textArea.style.left = "0";
+    textArea.style.position = "fixed";
+    textArea.style.opacity = "0";
+    
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    
+    try {
+        document.execCommand('copy');
+        alert('Chave PIX copiada!');
+    } catch (err) {
+        alert('Erro ao copiar. Chave PIX: (17)996232492');
+    }
+    
+    document.body.removeChild(textArea);
+}
     </script>
     
     <!-- Addons Modal -->
@@ -835,4 +883,5 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
     </div>
 </div>
-    </body></html>
+    </body>
+</html>
