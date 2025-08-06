@@ -3,768 +3,170 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MestreBrigadeiros - Delícias Artesanais</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'instagram-purple': '#833AB4',
-                        'instagram-pink': '#FD1D1D',
-                        'instagram-orange': '#FCB045',
-                        'instagram-blue': '#405DE6'
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-        
-        body {
-            font-family: 'Inter', sans-serif;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
-        
-        .instagram-gradient {
-            background: linear-gradient(45deg, #833AB4, #FD1D1D, #FCB045);
-        }
-        
-        .instagram-text-gradient {
-            background: linear-gradient(45deg, #833AB4, #FD1D1D, #FCB045);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
-        .card-hover {
-            transition: all 0.3s ease;
-        }
-        
-        .card-hover:active {
-            transform: scale(0.98);
-        }
-        
-        .btn-instagram {
-            background: linear-gradient(45deg, #833AB4, #FD1D1D, #FCB045);
-            transition: all 0.2s ease;
-        }
-        
-        .btn-instagram:active {
-            transform: scale(0.95);
-        }
-        
-        .btn-outline {
-            border: 2px solid transparent;
-            background: linear-gradient(white, white) padding-box,
-                        linear-gradient(45deg, #833AB4, #FD1D1D, #FCB045) border-box;
-            transition: all 0.2s ease;
-        }
-        
-        .btn-outline:active {
-            background: linear-gradient(45deg, #833AB4, #FD1D1D, #FCB045);
-            color: white;
-            transform: scale(0.95);
-        }
-        
-        /* Cart Modal Styles */
-        .cart-modal {
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(5px);
-            background-color: rgba(0, 0, 0, 0.5);
-        }
-
-        .cart-modal.open {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .cart-modal-content {
-            transform: scale(0.9) translateY(20px);
-            transition: all 0.3s ease;
-        }
-
-        .cart-modal.open .cart-modal-content {
-            transform: scale(1) translateY(0);
-        }
-        
-        /* Overlay Styles */
-        .modal-overlay {
-            backdrop-filter: blur(5px);
-            background-color: rgba(0, 0, 0, 0.5);
-        }
-        
-        .touch-target {
-            min-height: 44px;
-            min-width: 44px;
-        }
-        
-        html {
-            scroll-behavior: smooth;
-        }
-        
-        .quantity-btn {
-            transition: all 0.2s ease;
-        }
-        
-        .quantity-btn:active {
-            transform: scale(0.9);
-        }
-        
-        .cart-badge {
-            animation: bounce 0.5s ease;
-        }
-        
-        @keyframes bounce {
-            0%, 20%, 60%, 100% { transform: translateY(0); }
-            40% { transform: translateY(-10px); }
-            80% { transform: translateY(-5px); }
-        }
-    </style>
+    <title>Cardápio Digital</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body class="bg-white">
-    <!-- Mobile Header -->
-    <header class="bg-white shadow-lg sticky top-0 z-50 border-b border-gray-100">
-        <nav class="px-4 py-3">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-2">
-                    <div class="w-10 h-10 instagram-gradient rounded-full flex items-center justify-center">
-                        <i data-lucide="heart" class="w-5 h-5 text-white"></i>
-                    </div>
-                    <h1 class="text-xl font-bold instagram-text-gradient">MestreBrigadeiros</h1>
+<body>
+    <!-- Splash Screen / Loading -->
+    <div id="loading" class="loading-screen">
+        <img src="LOGODIPFOOD.png" alt="Logo da Loja" class="loading-logo">
+        <div class="spinner"></div>
+        <p>Carregando cardápio...</p>
+    </div>
+
+    <!-- Closed Message -->
+    <div id="closed-message" class="closed-message hidden">
+        <img src="LOGODIPFOOD.png" alt="Logo da Loja" class="closed-logo">
+        <h1>Loja Fechada</h1>
+        <p>Desculpe, nossa loja está fechada no momento.</p>
+        <p>Horário de funcionamento: <span id="opening-hours"></span></p>
+        <p>Aguardamos seu pedido em breve!</p>
+    </div>
+
+    <!-- Main Content -->
+    <div id="main-content" class="main-content hidden">
+        <header class="header">
+            <div class="header-content">
+                <img src="LOGODIPFOOD.png" alt="Logo da Loja" class="company-logo">
+                <div class="store-info-container">
+                    <h1 id="store-name">Carregando...</h1>
+                    <p id="store-info">Carregando informações...</p>
+                    <p id="estimated-pickup-time-display" class="estimated-time"></p>
+                    <p id="estimated-delivery-time-display" class="estimated-time"></p>
                 </div>
-                
-                <div class="flex items-center space-x-3">
-                    <!-- Cart Button -->
-                    <button id="cart-btn" class="relative touch-target flex items-center justify-center text-gray-700">
-                        <i data-lucide="shopping-cart" class="w-6 h-6"></i>
-                        <span id="cart-count" class="absolute -top-2 -right-2 bg-instagram-pink text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold hidden">0</span>
-                    </button>
-                    
-                    <button id="mobile-menu-btn" class="touch-target flex items-center justify-center text-gray-700">
-                        <i data-lucide="menu" class="w-6 h-6"></i>
-                    </button>
-                </div>
+            </div>
+        </header>
+
+        <nav class="categories-nav">
+            <div id="categories" class="categories-list">
+                <!-- Categories will be loaded here -->
             </div>
         </nav>
-    </header>
 
-    <!-- Menu Modal -->
-    <div id="menu-modal" class="fixed inset-0 z-50 cart-modal flex items-center justify-center p-4">
-        <div class="cart-modal-content bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] flex flex-col">
-            <!-- Modal Header -->
-            <div class="flex items-center justify-between p-6 border-b border-gray-200">
-                <div class="flex items-center space-x-2">
-                    <div class="w-10 h-10 instagram-gradient rounded-full flex items-center justify-center">
-                        <i data-lucide="heart" class="w-5 h-5 text-white"></i>
-                    </div>
-                    <h2 class="text-xl font-bold instagram-text-gradient">Menu</h2>
-                </div>
-                <button id="close-menu" class="touch-target flex items-center justify-center text-gray-700 hover:bg-gray-100 rounded-full">
-                    <i data-lucide="x" class="w-6 h-6"></i>
-                </button>
+        <main class="products-container">
+            <div id="products" class="products-grid">
+                <!-- Products will be loaded here -->
             </div>
+        </main>
+
+        <aside id="cart-summary" class="cart-summary hidden">
+            <h2>Seu Pedido</h2>
+            <div id="cart-items" class="cart-items">
+                <!-- Cart items will be loaded here -->
+            </div>
+            <div class="cart-total-container">
+                <span>Total:</span>
+                <span class="total-amount">R$ <span id="cart-total">0,00</span></span>
+            </div>
+            <div class="cart-actions">
+                <button id="clear-cart" class="btn-secondary">Limpar Carrinho</button>
+                <button id="checkout-btn" class="btn-primary">Finalizar Pedido</button>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Product Detail Modal -->
+    <div id="product-detail-modal" class="modal">
+        <div class="modal-content product-detail-content">
+            <span class="close">&times;</span>
+            <h2 id="detail-product-name"></h2>
+            <img id="detail-product-image" src="/placeholder.svg?height=200&width=200" alt="Product Image">
+            <p id="detail-product-description"></p>
+            <div class="product-detail-price">R$ <span id="detail-product-price"></span></div>
             
-            <!-- Modal Content -->
-            <div class="flex-1 overflow-y-auto p-6">
-                <nav class="space-y-4">
-                    <a href="#inicio" class="block py-3 px-4 text-lg font-semibold text-gray-700 hover:bg-gray-100 rounded-xl transition-colors">🏠 Início</a>
-                    <a href="#produtos" class="block py-3 px-4 text-lg font-semibold text-gray-700 hover:bg-gray-100 rounded-xl transition-colors">🍫 Produtos</a>
-                    <a href="#encomendas" class="block py-3 px-4 text-lg font-semibold text-gray-700 hover:bg-gray-100 rounded-xl transition-colors">🎉 Encomendas</a>
-                    <a href="#entrega" class="block py-3 px-4 text-lg font-semibold text-gray-700 hover:bg-gray-100 rounded-xl transition-colors">🚚 Entrega</a>
-                    <a href="#contato" class="block py-3 px-4 text-lg font-semibold text-gray-700 hover:bg-gray-100 rounded-xl transition-colors">📞 Contato</a>
-                </nav>
-                
-                <div class="mt-8 pt-6 border-t border-gray-200">
-                    <p class="text-sm text-gray-500 mb-4">Fale conosco:</p>
-                    <a href="tel:+5517992095122" class="block py-3 px-4 bg-green-500 text-white rounded-xl font-semibold text-center mb-3">
-                        📱 WhatsApp: (17) 992095122
-                    </a>
-                    <a href="mailto:contato@mestrebrigadeiros.com.br" class="block py-3 px-4 bg-gray-100 text-gray-700 rounded-xl font-semibold text-center">
-                        📧 E-mail
-                    </a>
+            <div class="addons-section">
+                <h3>Acréscimos</h3>
+                <div id="product-addons-list" class="addons-list">
+                    <!-- Addons will be loaded here -->
                 </div>
             </div>
+
+            <div class="quantity-control">
+                <button onclick="updateDetailQuantity(-1)">-</button>
+                <span id="detail-quantity">1</span>
+                <button onclick="updateDetailQuantity(1)">+</button>
+            </div>
+            <button id="add-to-cart-from-detail" class="btn-primary">Adicionar ao Carrinho</button>
         </div>
     </div>
 
-    <!-- Cart Modal -->
-    <div id="cart-modal" class="fixed inset-0 z-50 cart-modal flex items-center justify-center p-4">
-        <div class="cart-modal-content bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[80vh] flex flex-col">
-            <!-- Modal Header -->
-            <div class="flex items-center justify-between p-6 border-b border-gray-200">
-                <h2 class="text-xl font-bold instagram-text-gradient">🛒 Seu Carrinho</h2>
-                <button id="close-cart" class="touch-target flex items-center justify-center text-gray-700 hover:bg-gray-100 rounded-full">
-                    <i data-lucide="x" class="w-6 h-6"></i>
-                </button>
+    <!-- Checkout Modal -->
+    <div id="checkout-modal" class="modal">
+        <div class="modal-content checkout-content">
+            <span class="close">&times;</span>
+            <h2>Finalizar Pedido</h2>
+            <div id="checkout-items" class="checkout-items">
+                <!-- Checkout items will be loaded here -->
             </div>
-            
-            <!-- Modal Content -->
-            <div class="flex-1 overflow-hidden flex flex-col">
-                <div id="cart-items" class="flex-1 overflow-y-auto p-6 space-y-4">
-                    <!-- Cart items will be inserted here -->
+            <div class="checkout-summary">
+                <div class="summary-line">
+                    <span>Subtotal:</span>
+                    <span>R$ <span id="checkout-subtotal">0,00</span></span>
                 </div>
-                
-                <div id="cart-empty" class="flex-1 flex items-center justify-center text-center p-6">
-                    <div>
-                        <i data-lucide="shopping-cart" class="w-16 h-16 text-gray-300 mx-auto mb-4"></i>
-                        <p class="text-gray-500 text-lg">Seu carrinho está vazio</p>
-                        <p class="text-gray-400">Adicione alguns brigadeiros deliciosos!</p>
-                    </div>
+                <div id="delivery-fee-line" class="summary-line" style="display: none;">
+                    <span>Taxa de Entrega:</span>
+                    <span>R$ <span id="checkout-delivery-fee">0,00</span></span>
+                </div>
+                <div class="summary-line total-line">
+                    <span>Total:</span>
+                    <span>R$ <span id="checkout-total">0,00</span></span>
                 </div>
             </div>
-            
-            <!-- Modal Footer -->
-            <div id="cart-footer" class="border-t border-gray-200 p-6 bg-gray-50 rounded-b-2xl hidden">
-                <div class="flex justify-between items-center mb-4">
-                    <span class="text-lg font-bold">Total:</span>
-                    <span id="cart-total" class="text-2xl font-bold instagram-text-gradient">R$ 0,00</span>
+
+            <form id="checkout-form">
+                <h3>Seus Dados</h3>
+                <div class="form-group">
+                    <label for="customer-name">Nome:</label>
+                    <input type="text" id="customer-name" required>
                 </div>
-                <button id="checkout-btn" class="btn-instagram text-white font-bold py-3 px-6 rounded-xl w-full">
-                    🎯 Finalizar Pedido
-                </button>
-            </div>
+                <div class="form-group">
+                    <label for="customer-phone">Telefone (WhatsApp):</label>
+                    <input type="tel" id="customer-phone" placeholder="(XX) XXXXX-XXXX" required>
+                </div>
+                <div class="form-group">
+                    <label for="delivery-type">Tipo de Pedido:</label>
+                    <select id="delivery-type" required>
+                        <!-- Options will be loaded by JS -->
+                    </select>
+                </div>
+                <div id="address-group" class="form-group" style="display: none;">
+                    <label for="customer-address">Endereço de Entrega:</label>
+                    <input type="text" id="customer-address" placeholder="Rua, Número, Bairro, Complemento">
+                </div>
+                <div class="form-group">
+                    <label for="payment-method">Método de Pagamento:</label>
+                    <select id="payment-method" required>
+                        <option value="">Selecione...</option>
+                        <option value="pix">PIX</option>
+                        <option value="money">Dinheiro</option>
+                        <option value="card">Cartão</option>
+                    </select>
+                </div>
+                <div id="pix-info" class="payment-info" style="display: none;">
+                    <p>Chave PIX: <strong id="pix-key"></strong></p>
+                    <p>Envie o comprovante para nosso WhatsApp após o pagamento.</p>
+                </div>
+                <div id="change-info" class="payment-info" style="display: none;">
+                    <label for="change-for-amount">Precisa de troco para quanto?</label>
+                    <input type="number" id="change-for-amount" step="0.01" min="0" placeholder="Deixe em branco se não precisar">
+                </div>
+                <button type="submit" class="btn-primary">Confirmar Pedido</button>
+            </form>
         </div>
     </div>
 
-    <!-- Hero Section -->
-    <section id="inicio" class="py-12 px-4 bg-white">
-        <div class="container mx-auto text-center">
-            <div class="mb-8">
-                <img src="b1.jpg" alt="Brigadeiros artesanais" class="w-full max-w-sm mx-auto rounded-3xl shadow-xl object-cover">
-            </div>
-            
-            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4 leading-tight">
-                Delícias feitas com <span class="instagram-text-gradient">amor</span> para todos os momentos
-            </h2>
-            
-            <p class="text-lg text-gray-600 mb-8 leading-relaxed px-2">
-                Brigadeiros artesanais únicos, preparados com ingredientes premium e muito carinho.
-            </p>
-            
-            <div class="space-y-4">
-                <button id="ver-cardapio-btn" class="btn-instagram text-white font-bold py-4 px-8 rounded-full text-lg w-full max-w-xs">
-                    Ver Cardápio
-                </button>
-                <button id="fazer-encomenda-btn" class="btn-outline text-gray-800 font-bold py-4 px-8 rounded-full text-lg w-full max-w-xs">
-                    Fazer Encomenda
-                </button>
-            </div>
+    <!-- Success Modal -->
+    <div id="success-modal" class="modal">
+        <div class="modal-content success-content">
+            <h2>🎉 Pedido Realizado com Sucesso!</h2>
+            <p>Seu pedido #<span id="order-number"></span> foi enviado para a loja.</p>
+            <p>Acompanhe o status pelo WhatsApp.</p>
+            <button id="new-order-btn" class="btn-primary">Fazer Novo Pedido</button>
         </div>
-    </section>
+    </div>
 
-    <!-- Produtos Section -->
-    <section id="produtos" class="py-12 px-4 bg-gray-50">
-        <div class="container mx-auto">
-            <div class="text-center mb-10">
-                <h3 class="text-3xl font-bold text-gray-900 mb-4">Nossos <span class="instagram-text-gradient">Produtos</span></h3>
-                <p class="text-lg text-gray-600 leading-relaxed px-2">
-                    Cada brigadeiro é uma pequena obra de arte feita com ingredientes premium.
-                </p>
-            </div>
-            
-            <div class="space-y-6">
-                <!-- Tradicional -->
-                <div class="bg-white rounded-2xl p-6 shadow-lg">
-                    <div class="flex items-start space-x-4 mb-4">
-                        <img src="b3.jpg?height=120&width=120" alt="Brigadeiros Tradicionais" class="w-24 h-24 object-cover rounded-xl flex-shrink-0">
-                        <div class="flex-1">
-                            <div class="flex items-center mb-2">
-                                <h4 class="text-xl font-bold text-gray-900">Tradicional</h4>
-                                <div class="ml-2 w-8 h-8 instagram-gradient rounded-full flex items-center justify-center">
-                                    <i data-lucide="star" class="w-4 h-4 text-white"></i>
-                                </div>
-                            </div>
-                            <p class="text-gray-600 text-sm mb-3 leading-relaxed">
-                                O clássico brigadeiro brasileiro, feito com chocolate belga premium e leite condensado artesanal.
-                            </p>
-                            <div class="flex items-center justify-between mb-4">
-                                <span class="text-2xl font-bold instagram-text-gradient">R$ 3,50</span>
-                                <span class="text-xs text-gray-500">por unidade</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-3">
-                            <button class="quantity-btn w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center" onclick="changeQuantity('tradicional', -1)">
-                                <i data-lucide="minus" class="w-4 h-4"></i>
-                            </button>
-                            <span id="qty-tradicional" class="text-lg font-bold w-8 text-center">0</span>
-                            <button class="quantity-btn w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center" onclick="changeQuantity('tradicional', 1)">
-                                <i data-lucide="plus" class="w-4 h-4"></i>
-                            </button>
-                        </div>
-                        <button class="btn-instagram text-white font-bold py-2 px-3 rounded-xl text-sm" onclick="addToCart('tradicional', 'Tradicional', 3.50)">
-                            Adicionar
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- Gourmet -->
-                <div class="bg-white rounded-2xl p-6 shadow-lg">
-                    <div class="flex items-start space-x-4 mb-4">
-                        <img src="b2.jpg?height=120&width=120" alt="Brigadeiros Gourmet" class="w-24 h-24 object-cover rounded-xl flex-shrink-0">
-                        <div class="flex-1">
-                            <div class="flex items-center mb-2">
-                                <h4 class="text-xl font-bold text-gray-900">Gourmet</h4>
-                                <div class="ml-2 w-8 h-8 instagram-gradient rounded-full flex items-center justify-center">
-                                    <i data-lucide="crown" class="w-4 h-4 text-white"></i>
-                                </div>
-                            </div>
-                            <p class="text-gray-600 text-sm mb-3 leading-relaxed">
-                                Sabores exclusivos como pistache, maracujá, café especial e chocolate 70%. Uma experiência única.
-                            </p>
-                            <div class="flex items-center justify-between mb-4">
-                                <span class="text-2xl font-bold instagram-text-gradient">R$ 5,00</span>
-                                <span class="text-xs text-gray-500">por unidade</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-3">
-                            <button class="quantity-btn w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center" onclick="changeQuantity('gourmet', -1)">
-                                <i data-lucide="minus" class="w-4 h-4"></i>
-                            </button>
-                            <span id="qty-gourmet" class="text-lg font-bold w-8 text-center">0</span>
-                            <button class="quantity-btn w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center" onclick="changeQuantity('gourmet', 1)">
-                                <i data-lucide="plus" class="w-4 h-4"></i>
-                            </button>
-                        </div>
-                        <button class="btn-instagram text-white font-bold py-2 px-3 rounded-xl text-sm" onclick="addToCart('gourmet', 'Gourmet', 5.00)">
-                            Adicionar
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- Caixas Personalizadas -->
-                <div class="bg-white rounded-2xl p-6 shadow-lg">
-                    <div class="flex items-start space-x-4 mb-4">
-                        <img src="caixa1.jpg?height=120&width=120" alt="Caixas Personalizadas" class="w-24 h-24 object-cover rounded-xl flex-shrink-0">
-                        <div class="flex-1">
-                            <div class="flex items-center mb-2">
-                                <h4 class="text-xl font-bold text-gray-900">Caixas Personalizadas</h4>
-                                <div class="ml-2 w-8 h-8 instagram-gradient rounded-full flex items-center justify-center">
-                                    <i data-lucide="gift" class="w-4 h-4 text-white"></i>
-                                </div>
-                            </div>
-                            <p class="text-gray-600 text-sm mb-3 leading-relaxed">
-                                Caixas especiais para presentes com embalagem personalizada e seleção de sabores exclusivos.
-                            </p>
-                            <div class="flex items-center justify-between mb-4">
-                                <span class="text-xl font-bold instagram-text-gradient">R$ 45,00</span>
-                                <span class="text-xs text-gray-500">caixa com 12</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-3">
-                            <button class="quantity-btn w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center" onclick="changeQuantity('caixas', -1)">
-                                <i data-lucide="minus" class="w-4 h-4"></i>
-                            </button>
-                            <span id="qty-caixas" class="text-lg font-bold w-8 text-center">0</span>
-                            <button class="quantity-btn w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center" onclick="changeQuantity('caixas', 1)">
-                                <i data-lucide="plus" class="w-4 h-4"></i>
-                            </button>
-                        </div>
-                        <button class="btn-instagram text-white font-bold py-2 px-3 rounded-xl text-sm" onclick="addToCart('caixas', 'Caixas Personalizadas', 45.00)">
-                            Adicionar
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Encomendas para Festas -->
-    <section id="encomendas" class="py-12 px-4 bg-white">
-        <div class="container mx-auto">
-            <div class="text-center mb-10">
-                <div class="w-16 h-16 instagram-gradient rounded-full flex items-center justify-center mx-auto mb-6">
-                    <i data-lucide="users" class="w-8 h-8 text-white"></i>
-                </div>
-                <h3 class="text-3xl font-bold text-gray-900 mb-4">Encomendas para <span class="instagram-text-gradient">Festas</span></h3>
-                <p class="text-lg text-gray-600 leading-relaxed px-2">
-                    Tornamos seus eventos ainda mais especiais com brigadeiros personalizados.
-                </p>
-            </div>
-            
-            <div class="bg-white rounded-2xl p-6 shadow-xl border border-gray-100">
-                <form id="encomenda-form" class="space-y-6">
-                    <div>
-                        <label class="block text-gray-800 font-bold mb-2">Nome Completo</label>
-                        <input type="text" class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-instagram-purple focus:outline-none transition-colors" placeholder="Seu nome completo" required>
-                    </div>
-                    
-                    <div>
-                        <label class="block text-gray-800 font-bold mb-2">Data do Evento</label>
-                        <input type="date" class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-instagram-purple focus:outline-none transition-colors" required>
-                    </div>
-                    
-                    <div>
-                        <label class="block text-gray-800 font-bold mb-2">Tipo de Evento</label>
-                        <select class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-instagram-purple focus:outline-none transition-colors" required>
-                            <option value="">Selecione o tipo</option>
-                            <option value="aniversario">🎂 Aniversário</option>
-                            <option value="casamento">💒 Casamento</option>
-                            <option value="infantil">🎈 Festa Infantil</option>
-                            <option value="corporativo">🏢 Evento Corporativo</option>
-                            <option value="formatura">🎓 Formatura</option>
-                            <option value="outro">🎉 Outro</option>
-                        </select>
-                    </div>
-                    
-                    <div>
-                        <label class="block text-gray-800 font-bold mb-2">Quantidade Estimada</label>
-                        <input type="number" class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-instagram-purple focus:outline-none transition-colors" placeholder="Ex: 100 unidades" required>
-                    </div>
-                    
-                    <div>
-                        <label class="block text-gray-800 font-bold mb-2">Observações</label>
-                        <textarea rows="4" class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-instagram-purple focus:outline-none transition-colors resize-none" placeholder="Conte-nos sobre seu evento, sabores preferidos..."></textarea>
-                    </div>
-                    
-                    <button type="submit" class="btn-instagram text-white font-bold py-4 px-6 rounded-xl text-lg w-full">
-                        🎯 Solicitar Orçamento Gratuito
-                    </button>
-                </form>
-            </div>
-        </div>
-    </section>
-
-    <!-- Entrega Section -->
-    <section id="entrega" class="py-12 px-4 bg-gray-50">
-        <div class="container mx-auto">
-            <div class="text-center mb-10">
-                <h3 class="text-3xl font-bold text-gray-900 mb-4">Nossa <span class="instagram-text-gradient">Entrega</span></h3>
-                <p class="text-lg text-gray-600 leading-relaxed px-2">
-                    Levamos nossos doces até você com todo cuidado e pontualidade.
-                </p>
-            </div>
-            
-            <div class="space-y-6">
-                <div class="bg-white rounded-2xl p-6 text-center shadow-lg">
-                    <div class="w-16 h-16 instagram-gradient rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i data-lucide="map-pin" class="w-8 h-8 text-white"></i>
-                    </div>
-                    <h4 class="text-xl font-bold text-gray-900 mb-3">Área de Entrega</h4>
-                    <p class="text-gray-600 leading-relaxed">
-                        <strong>Entregamos em toda Cidade</strong> De Novo Horizonte, Consulte outras cidades.
-                    </p>
-                </div>
-                
-                <div class="bg-white rounded-2xl p-6 text-center shadow-lg">
-                    <div class="w-16 h-16 instagram-gradient rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i data-lucide="clock" class="w-8 h-8 text-white"></i>
-                    </div>
-                    <h4 class="text-xl font-bold text-gray-900 mb-3">Prazo de Entrega</h4>
-                    <p class="text-gray-600 leading-relaxed">
-                        <strong>Pedidos com 48h de antecedência.</strong> Para eventos, recomendamos 1 semana.
-                    </p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer id="contato" class="bg-gray-900 text-white py-12 px-4">
-        <div class="container mx-auto text-center">
-            <div class="flex items-center justify-center space-x-2 mb-6">
-                <div class="w-12 h-12 instagram-gradient rounded-full flex items-center justify-center">
-                    <i data-lucide="heart" class="w-6 h-6 text-white"></i>
-                </div>
-                <h2 class="text-2xl font-bold">MestreBrigadeiros</h2>
-            </div>
-            
-            <p class="text-lg text-gray-300 mb-8 leading-relaxed">
-                Siga-nos nas redes sociais e fique por dentro das novidades!
-            </p>
-            
-            <div class="flex justify-center space-x-6 mb-8">
-                <a href="#" class="w-14 h-14 instagram-gradient rounded-full flex items-center justify-center touch-target">
-                    <i data-lucide="instagram" class="w-7 h-7 text-white"></i>
-                </a>
-                <a href="https://wa.me/5517992095122" class="w-14 h-14 bg-green-500 rounded-full flex items-center justify-center touch-target">
-                    <i data-lucide="message-circle" class="w-7 h-7 text-white"></i>
-                </a>
-                <a href="#" class="w-14 h-14 bg-blue-600 rounded-full flex items-center justify-center touch-target">
-                    <i data-lucide="facebook" class="w-7 h-7 text-white"></i>
-                </a>
-            </div>
-            
-            <div class="space-y-4 text-gray-400 border-t border-gray-700 pt-6">
-                <p>&copy; 2024 MestreBrigadeiros. Todos os direitos reservados.</p>
-                <p>Feito com ❤️ para adoçar seus momentos especiais</p>
-                <div class="space-y-2">
-                    <a href="tel:+5517992095122" class="block text-lg font-semibold text-green-400">
-                        📱 (17) 99209-5122
-                    </a>
-                    <a href="mailto:contato@mestrebrigadeiros.com.br" class="block text-lg font-semibold text-blue-400">
-                        📧 contato@mestrebrigadeiros.com.br
-                    </a>
-                </div>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Fixed WhatsApp Button -->
-    <a href="https://wa.me/5517992095122?text=Olá! Gostaria de fazer um pedido de brigadeiros 🍫" 
-       class="fixed bottom-6 right-6 w-14 h-14 bg-green-500 rounded-full flex items-center justify-center shadow-2xl z-40 touch-target"
-       style="box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4);">
-        <i data-lucide="message-circle" class="w-7 h-7 text-white"></i>
-    </a>
-
-    <script>
-        // Initialize Lucide icons
-        lucide.createIcons();
-        
-        // Cart functionality
-        let cart = [];
-        let quantities = {
-            tradicional: 0,
-            gourmet: 0,
-            caixas: 0
-        };
-        
-        // Menu modal functionality
-        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-        const menuModal = document.getElementById('menu-modal');
-        const closeMenuBtn = document.getElementById('close-menu');
-
-        function openMenu() {
-            menuModal.classList.add('open');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeMenu() {
-            menuModal.classList.remove('open');
-            document.body.style.overflow = '';
-        }
-        
-        // Cart modal functionality
-        const cartBtn = document.getElementById('cart-btn');
-        const cartModal = document.getElementById('cart-modal');
-        const closeCartBtn = document.getElementById('close-cart');
-        
-        function openCart() {
-            cartModal.classList.add('open');
-            document.body.style.overflow = 'hidden';
-        }
-        
-        function closeCart() {
-            cartModal.classList.remove('open');
-            document.body.style.overflow = '';
-        }
-        
-        // Event listeners
-        mobileMenuBtn.addEventListener('click', openMenu);
-        closeMenuBtn.addEventListener('click', closeMenu);
-        
-        cartBtn.addEventListener('click', openCart);
-        closeCartBtn.addEventListener('click', closeCart);
-        
-        // Close menu when clicking outside the modal content
-        menuModal.addEventListener('click', function(e) {
-            if (e.target === menuModal) {
-                closeMenu();
-            }
-        });
-        
-        // Close cart when clicking outside the modal content
-        cartModal.addEventListener('click', function(e) {
-            if (e.target === cartModal) {
-                closeCart();
-            }
-        });
-        
-        // Quantity functions
-        function changeQuantity(product, change) {
-            quantities[product] = Math.max(0, quantities[product] + change);
-            document.getElementById(`qty-${product}`).textContent = quantities[product];
-        }
-        
-        // Add to cart function
-        function addToCart(id, name, price) {
-            const quantity = quantities[id];
-            if (quantity === 0) {
-                alert('Por favor, selecione uma quantidade antes de adicionar ao carrinho!');
-                return;
-            }
-            
-            const existingItem = cart.find(item => item.id === id);
-            if (existingItem) {
-                existingItem.quantity += quantity;
-            } else {
-                cart.push({
-                    id: id,
-                    name: name,
-                    price: price,
-                    quantity: quantity
-                });
-            }
-            
-            // Reset quantity
-            quantities[id] = 0;
-            document.getElementById(`qty-${id}`).textContent = 0;
-            
-            updateCartDisplay();
-            
-            // Show success message
-            alert(`✅ ${quantity}x ${name} adicionado ao carrinho!`);
-        }
-        
-        // Update cart display
-        function updateCartDisplay() {
-            const cartCount = document.getElementById('cart-count');
-            const cartItems = document.getElementById('cart-items');
-            const cartEmpty = document.getElementById('cart-empty');
-            const cartFooter = document.getElementById('cart-footer');
-            const cartTotal = document.getElementById('cart-total');
-            
-            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-            const totalPrice = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-            
-            // Update cart count badge
-            if (totalItems > 0) {
-                cartCount.textContent = totalItems;
-                cartCount.classList.remove('hidden');
-                cartCount.classList.add('cart-badge');
-            } else {
-                cartCount.classList.add('hidden');
-            }
-            
-            // Update cart items display
-            if (cart.length === 0) {
-                cartEmpty.classList.remove('hidden');
-                cartFooter.classList.add('hidden');
-                cartItems.innerHTML = '';
-            } else {
-                cartEmpty.classList.add('hidden');
-                cartFooter.classList.remove('hidden');
-                
-                cartItems.innerHTML = cart.map(item => `
-                    <div class="bg-gray-50 rounded-xl p-4">
-                        <div class="flex justify-between items-start mb-2">
-                            <h4 class="font-bold text-gray-900">${item.name}</h4>
-                            <button onclick="removeFromCart('${item.id}')" class="text-red-500 hover:text-red-700 p-1 hover:bg-red-50 rounded">
-                                <i data-lucide="trash-2" class="w-4 h-4"></i>
-                            </button>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-gray-600">${item.quantity}x R$ ${item.price.toFixed(2)}</span>
-                            <span class="font-bold instagram-text-gradient">R$ ${(item.price * item.quantity).toFixed(2)}</span>
-                        </div>
-                    </div>
-                `).join('');
-                
-                cartTotal.textContent = `R$ ${totalPrice.toFixed(2)}`;
-                
-                // Re-initialize Lucide icons for new elements
-                lucide.createIcons();
-            }
-        }
-        
-        // Remove from cart
-        function removeFromCart(id) {
-            cart = cart.filter(item => item.id !== id);
-            updateCartDisplay();
-        }
-        
-        // Hero buttons functionality
-        document.getElementById('ver-cardapio-btn').addEventListener('click', function() {
-            document.getElementById('produtos').scrollIntoView({ behavior: 'smooth' });
-        });
-        
-        document.getElementById('fazer-encomenda-btn').addEventListener('click', function() {
-            document.getElementById('encomendas').scrollIntoView({ behavior: 'smooth' });
-        });
-        
-        // Checkout functionality
-        document.getElementById('checkout-btn').addEventListener('click', function() {
-            if (cart.length === 0) return;
-            
-            const totalPrice = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-            const itemsList = cart.map(item => `${item.quantity}x ${item.name}`).join(', ');
-            
-            const whatsappMessage = `🛒 *Pedido MestreBrigadeiros*\n\n` +
-                `📝 *Itens:*\n${cart.map(item => `• ${item.quantity}x ${item.name} - R$ ${(item.price * item.quantity).toFixed(2)}`).join('\n')}\n\n` +
-                `💰 *Total: R$ ${totalPrice.toFixed(2)}*\n\n` +
-                `Gostaria de finalizar este pedido! 😊`;
-            
-            const whatsappUrl = `https://wa.me/5517992095122?text=${encodeURIComponent(whatsappMessage)}`;
-            window.open(whatsappUrl, '_blank');
-        });
-        
-        // Form submission
-        const form = document.getElementById('encomenda-form');
-        form.addEventListener('submit', (e) => {
-            e.preventDefault();
-            
-            const formData = new FormData(form);
-            const nome = form.querySelector('input[type="text"]').value;
-            const data = form.querySelector('input[type="date"]').value;
-            const tipo = form.querySelector('select').value;
-            const quantidade = form.querySelector('input[type="number"]').value;
-            const observacoes = form.querySelector('textarea').value;
-            
-            const whatsappMessage = `🎉 *Encomenda para Festa*\n\n` +
-                `👤 *Nome:* ${nome}\n` +
-                `📅 *Data:* ${data}\n` +
-                `🎊 *Tipo:* ${tipo}\n` +
-                `📦 *Quantidade:* ${quantidade} unidades\n` +
-                `📝 *Observações:* ${observacoes}\n\n` +
-                `Gostaria de solicitar um orçamento! 😊`;
-            
-            const whatsappUrl = `https://wa.me/5517992095122?text=${encodeURIComponent(whatsappMessage)}`;
-            window.open(whatsappUrl, '_blank');
-            
-            alert('🎉 Redirecionando para WhatsApp para finalizar seu orçamento!');
-        });
-        
-        // Smooth scrolling for navigation links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
-                closeMenu();
-            });
-        });
-        
-        // Add scroll effect to header
-        let lastScrollY = window.scrollY;
-        window.addEventListener('scroll', () => {
-            const header = document.querySelector('header');
-            const currentScrollY = window.scrollY;
-            
-            if (currentScrollY > lastScrollY && currentScrollY > 100) {
-                header.style.transform = 'translateY(-100%)';
-            } else {
-                header.style.transform = 'translateY(0)';
-            }
-            
-            lastScrollY = currentScrollY;
-        });
-        
-        // Close modals with Escape key
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                closeCart();
-                closeMenu();
-            }
-        });
-    </script>
+    <script src="tenant-resolver.js"></script>
+    <script src="scripts-updated.js"></script>
 </body>
 </html>

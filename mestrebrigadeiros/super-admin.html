@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Admin - DipFood</title>
+    <link rel="stylesheet" href="super-admin-styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <div class="admin-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img src="LOGODIPFOOD.png" alt="DipFood Logo" class="logo">
+                <h2>Super Admin</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><button class="nav-btn active" data-section="dashboard">Dashboard</button></li>
+                    <li><button class="nav-btn" data-section="companies">Empresas</button></li>
+                    <li><button class="nav-btn" data-section="analytics">Analytics</button></li>
+                    <li><button class="nav-btn" data-section="settings">Configurações</button></li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <button id="logout-btn" class="btn-logout">Sair</button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="main-header">
+                <h1>Painel de Controle</h1>
+            </header>
+
+            <!-- Dashboard Section -->
+            <section id="dashboard" class="admin-section active">
+                <h2>Dashboard</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Total de Empresas</h3>
+                        <p id="total-companies">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Empresas Ativas</h3>
+                        <p id="active-companies">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Pedidos Hoje</h3>
+                        <p id="orders-today">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Receita Total (Hoje)</h3>
+                        <p id="total-revenue">R$ 0,00</p>
+                    </div>
+                </div>
+
+                <div class="recent-activity-card">
+                    <h3>Atividade Recente</h3>
+                    <div id="recent-activity-list" class="activity-list">
+                        <p class="empty-state">Carregando atividade...</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Companies Section -->
+            <section id="companies" class="admin-section">
+                <h2>Gerenciar Empresas</h2>
+                <div class="controls-bar">
+                    <input type="text" id="company-search" placeholder="Pesquisar por nome, subdomínio, email...">
+                    <select id="status-filter">
+                        <option value="">Todos os Status</option>
+                        <option value="active">Ativo</option>
+                        <option value="inactive">Inativo</option>
+                        <option value="suspended">Suspenso</option>
+                    </select>
+                    <select id="plan-filter">
+                        <option value="">Todos os Planos</option>
+                        <option value="basic">Básico</option>
+                        <option value="premium">Premium</option>
+                        <option value="enterprise">Enterprise</option>
+                    </select>
+                    <button id="add-company-btn" class="btn-primary">Nova Empresa</button>
+                </div>
+                <div id="companies-list" class="companies-grid">
+                    <p class="empty-state">Carregando empresas...</p>
+                </div>
+            </section>
+
+            <!-- Analytics Section -->
+            <section id="analytics" class="admin-section">
+                <h2>Analytics</h2>
+                <p>Gráficos e métricas de uso do sistema serão exibidos aqui.</p>
+            </section>
+
+            <!-- Settings Section -->
+            <section id="settings" class="admin-section">
+                <h2>Configurações do Sistema</h2>
+                <form id="system-settings-form" class="settings-form">
+                    <div class="form-group">
+                        <label for="base-domain">Domínio Base (ex: dipfood.site)</label>
+                        <input type="text" id="base-domain" required>
+                    </div>
+                    <!-- O campo basePath foi removido, pois não é mais usado para subdomínios -->
+                    <!-- <div class="form-group">
+                        <label for="base-path">Caminho Base para Empresas (ex: /c/)</label>
+                        <input type="text" id="base-path" required>
+                    </div> -->
+                    <div class="form-group checkbox-group">
+                        <input type="checkbox" id="allow-self-registration">
+                        <label for="allow-self-registration">Permitir Auto-Registro de Empresas</label>
+                    </div>
+                    <div class="form-group">
+                        <label for="default-plan">Plano Padrão para Novas Empresas</label>
+                        <select id="default-plan">
+                            <option value="basic">Básico</option>
+                            <option value="premium">Premium</option>
+                            <option value="enterprise">Enterprise</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-primary">Salvar Configurações</button>
+                </form>
+            </section>
+        </main>
+    </div>
+
+    <!-- Company Modal -->
+    <div id="company-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="company-modal-title">Nova Empresa</h2>
+            <form id="company-form">
+                <input type="hidden" id="company-id">
+                <div class="form-group">
+                    <label for="company-name">Nome da Empresa</label>
+                    <input type="text" id="company-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="company-subdomain">Subdomínio da Empresa</label>
+                    <div class="input-with-suffix">
+                        <input type="text" id="company-subdomain" required pattern="^[a-z0-9][a-z0-9-]*[a-z0-9]$" title="Apenas letras minúsculas, números e hífens. Deve começar e terminar com letra ou número. Mínimo 3 caracteres.">
+                        <span class="subdomain-suffix">.dipfood.site</span>
+                    </div>
+                    <small>Este será o subdomínio da empresa (ex: "minhaempresa" para minhaempresa.dipfood.site).</small>
+                </div>
+                <div class="form-group">
+                    <label for="company-email">Email de Contato</label>
+                    <input type="email" id="company-email" required>
+                </div>
+                <div class="form-group">
+                    <label for="company-phone">Telefone</label>
+                    <input type="tel" id="company-phone">
+                </div>
+                <div class="form-group">
+                    <label for="company-address">Endereço</label>
+                    <input type="text" id="company-address">
+                </div>
+                <div class="form-group">
+                    <label for="company-logo">URL do Logo</label>
+                    <input type="url" id="company-logo">
+                </div>
+                <div class="form-group">
+                    <label for="company-status">Status</label>
+                    <select id="company-status" required>
+                        <option value="active">Ativo</option>
+                        <option value="inactive">Inativo</option>
+                        <option value="suspended">Suspenso</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="company-plan">Plano</label>
+                    <select id="company-plan" required>
+                        <option value="basic">Básico</option>
+                        <option value="premium">Premium</option>
+                        <option value="enterprise">Enterprise</option>
+                    </select>
+                </div>
+
+                <!-- Admin fields for new company -->
+                <div class="admin-section-form">
+                    <h3>Dados do Primeiro Administrador</h3>
+                    <div class="form-group">
+                        <label for="admin-name">Nome do Admin</label>
+                        <input type="text" id="admin-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="admin-email">Email do Admin</label>
+                        <input type="email" id="admin-email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="admin-password">Senha do Admin</label>
+                        <input type="password" id="admin-password" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-primary">Salvar Empresa</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Confirm Modal -->
+    <div id="confirm-modal" class="modal">
+        <div class="modal-content small-modal">
+            <span class="close">&times;</span>
+            <p id="confirm-message"></p>
+            <div class="modal-actions">
+                <button class="btn-secondary" onclick="closeModal('confirm-modal')">Cancelar</button>
+                <button id="confirm-action-btn" class="btn-delete">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="tenant-resolver.js"></script>
+    <script src="super-admin.js"></script>
+</body>
+</html>

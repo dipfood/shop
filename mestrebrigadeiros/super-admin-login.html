@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Admin - Login</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .login-header {
+            margin-bottom: 2rem;
+        }
+
+        .login-header h1 {
+            font-size: 2rem;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        .login-header p {
+            color: #666;
+            font-size: 1rem;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .login-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 1rem;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .login-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .error-message {
+            background: #fee;
+            color: #c53030;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .demo-info {
+            background: #f0f9ff;
+            border: 1px solid #0ea5e9;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+            color: #0c4a6e;
+        }
+
+        .demo-info h4 {
+            margin-bottom: 0.5rem;
+            color: #0369a1;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <h1>🏢 Super Admin</h1>
+            <p>Acesso ao painel de gerenciamento</p>
+        </div>
+
+        <form id="login-form" class="login-form">
+            <div id="error-container"></div>
+            
+            <div class="form-group">
+                <label for="username">Usuário:</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Senha:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+
+            <button type="submit" id="login-btn" class="login-btn">
+                <span id="login-text">Entrar</span>
+            </button>
+        </form>
+
+        <div class="demo-info">
+            <h4>Acesso de Demonstração:</h4>
+            <p><strong>Usuário:</strong> superadmin</p>
+            <p><strong>Senha:</strong> admin123</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('login-form');
+            const loginBtn = document.getElementById('login-btn');
+            const loginText = document.getElementById('login-text');
+            const errorContainer = document.getElementById('error-container');
+
+            // Verificar se já está logado
+            const session = localStorage.getItem('superAdminSession');
+            if (session) {
+                try {
+                    const sessionData = JSON.parse(session);
+                    if (sessionData.expires > Date.now()) {
+                        window.location.href = 'super-admin.html';
+                        return;
+                    }
+                } catch (e) {
+                    localStorage.removeItem('superAdminSession');
+                }
+            }
+
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+
+                // Limpar erros anteriores
+                errorContainer.innerHTML = '';
+
+                // Mostrar loading
+                loginBtn.disabled = true;
+                loginText.innerHTML = '<span class="loading"></span> Entrando...';
+
+                try {
+                    // Simular autenticação (em produção, fazer requisição para API)
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+
+                    if (username === 'superadmin' && password === 'admin123') {
+                        // Criar sessão
+                        const sessionData = {
+                            user: 'superadmin',
+                            expires: Date.now() + (24 * 60 * 60 * 1000) // 24 horas
+                        };
+                        
+                        localStorage.setItem('superAdminSession', JSON.stringify(sessionData));
+                        
+                        // Redirecionar
+                        window.location.href = 'super-admin.html';
+                    } else {
+                        throw new Error('Credenciais inválidas');
+                    }
+                } catch (error) {
+                    errorContainer.innerHTML = `
+                        <div class="error-message">
+                            ${error.message || 'Erro ao fazer login. Tente novamente.'}
+                        </div>
+                    `;
+                } finally {
+                    loginBtn.disabled = false;
+                    loginText.textContent = 'Entrar';
+                }
+            });
+
+            // Preencher campos demo ao clicar na info
+            document.querySelector('.demo-info').addEventListener('click', function() {
+                document.getElementById('username').value = 'superadmin';
+                document.getElementById('password').value = 'admin123';
+            });
+        });
+    </script>
+</body>
+</html>

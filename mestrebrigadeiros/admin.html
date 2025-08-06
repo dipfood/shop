@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Admin - Cardápio Digital</title>
+    <link rel="stylesheet" href="admin-style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <div class="admin-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img src="LOGODIPFOOD.png" alt="Logo da Empresa" class="logo company-logo">
+                <h2 id="store-name-sidebar">Carregando...</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><button class="nav-btn active" data-section="dashboard">Dashboard</button></li>
+                    <li><button class="nav-btn" data-section="products">Produtos</button></li>
+                    <li><button class="nav-btn" data-section="categories">Categorias</button></li>
+                    <li><button class="nav-btn" data-section="addons">Acréscimos</button></li>
+                    <li><button class="nav-btn" data-section="orders">Pedidos</button></li>
+                    <li><button class="nav-btn" data-section="reports">Relatórios</button></li>
+                    <li><button class="nav-btn" data-section="settings">Configurações</button></li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="store-status-toggle">
+                    <span>Loja: <strong id="status-text">Carregando...</strong></span>
+                    <label class="switch">
+                        <input type="checkbox" id="store-toggle">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <button id="logout-btn" class="btn-logout">Sair</button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="main-header">
+                <h1>Painel Administrativo</h1>
+            </header>
+
+            <!-- Dashboard Section -->
+            <section id="dashboard" class="admin-section active">
+                <h2>Dashboard</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Pedidos Hoje</h3>
+                        <p id="orders-today">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Receita Hoje</h3>
+                        <p id="revenue-today">R$ 0,00</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Produtos Ativos</h3>
+                        <p id="active-products">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Status da Loja</h3>
+                        <p id="store-status">Carregando...</p>
+                    </div>
+                </div>
+
+                <div class="recent-orders-card">
+                    <h3>Pedidos Recentes</h3>
+                    <div id="recent-orders-list" class="order-list">
+                        <p>Carregando pedidos...</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Products Section -->
+            <section id="products" class="admin-section">
+                <h2>Gerenciar Produtos</h2>
+                <div class="controls-bar">
+                    <button id="add-product-btn" class="btn-primary">Adicionar Produto</button>
+                </div>
+                <div id="products-list" class="item-list">
+                    <p>Carregando produtos...</p>
+                </div>
+            </section>
+
+            <!-- Categories Section -->
+            <section id="categories" class="admin-section">
+                <h2>Gerenciar Categorias</h2>
+                <div class="controls-bar">
+                    <button id="add-category-btn" class="btn-primary">Adicionar Categoria</button>
+                </div>
+                <div id="categories-list" class="item-list">
+                    <p>Carregando categorias...</p>
+                </div>
+            </section>
+
+            <!-- Addons Section -->
+            <section id="addons" class="admin-section">
+                <h2>Gerenciar Acréscimos</h2>
+                <div class="controls-bar">
+                    <button id="add-addon-btn" class="btn-primary">Adicionar Acréscimo</button>
+                </div>
+                <div id="addons-list" class="item-list">
+                    <p>Carregando acréscimos...</p>
+                </div>
+            </section>
+
+            <!-- Orders Section -->
+            <section id="orders" class="admin-section">
+                <h2>Gerenciar Pedidos</h2>
+                <div class="controls-bar">
+                    <input type="text" id="order-search-input" placeholder="Pesquisar por ID, nome ou telefone...">
+                    <select id="order-status-filter">
+                        <option value="">Todos os Status</option>
+                        <option value="pending">Pendente</option>
+                        <option value="confirmed">Confirmado</option>
+                        <option value="preparing">Preparando</option>
+                        <option value="ready">Pronto</option>
+                        <option value="delivered">Entregue</option>
+                        <option value="cancelled">Cancelado</option>
+                    </select>
+                    <button id="refresh-orders" class="btn-secondary">Atualizar Pedidos</button>
+                </div>
+                <div id="orders-list" class="order-list">
+                    <p>Carregando pedidos...</p>
+                </div>
+            </section>
+
+            <!-- Reports Section -->
+            <section id="reports" class="admin-section">
+                <h2>Relatórios</h2>
+                <div class="report-section">
+                    <h3>Relatório Diário</h3>
+                    <div class="controls-bar">
+                        <input type="date" id="daily-report-date">
+                        <button id="generate-daily-report-btn" class="btn-primary">Gerar Relatório Diário</button>
+                        <button id="print-daily-report-btn" class="btn-secondary" style="display: none;">Imprimir Relatório Diário</button>
+                    </div>
+                    <div id="daily-report-output" class="report-output"></div>
+                </div>
+
+                <div class="report-section">
+                    <h3>Relatório Mensal</h3>
+                    <div class="controls-bar">
+                        <button id="generate-monthly-report-btn" class="btn-primary">Gerar Relatório Mensal</button>
+                        <button id="print-monthly-report-btn" class="btn-secondary" style="display: none;">Imprimir Relatório Mensal</button>
+                    </div>
+                    <div id="monthly-report-output" class="report-output"></div>
+                </div>
+
+                <div class="report-section">
+                    <h3>Manutenção de Pedidos</h3>
+                    <div class="controls-bar">
+                        <button id="clear-old-orders-btn" class="btn-delete">Limpar Pedidos Antigos (30+ dias)</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Settings Section -->
+            <section id="settings" class="admin-section">
+                <h2>Configurações da Loja</h2>
+                <form id="settings-form" class="settings-form">
+                    <h3>Informações Gerais</h3>
+                    <div class="form-group">
+                        <label for="store-name-setting">Nome da Loja</label>
+                        <input type="text" id="store-name-setting" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="store-phone-setting">Telefone da Loja</label>
+                        <input type="tel" id="store-phone-setting">
+                    </div>
+                    <div class="form-group">
+                        <label for="store-address-setting">Endereço da Loja</label>
+                        <input type="text" id="store-address-setting">
+                    </div>
+                    <div class="form-group">
+                        <label for="whatsapp-number-setting">Número WhatsApp para Pedidos</label>
+                        <input type="tel" id="whatsapp-number-setting" placeholder="Ex: 5511987654321">
+                    </div>
+
+                    <h3>Horário de Funcionamento</h3>
+                    <div class="form-group">
+                        <label for="opening-time-setting">Horário de Abertura</label>
+                        <input type="time" id="opening-time-setting">
+                    </div>
+                    <div class="form-group">
+                        <label for="closing-time-setting">Horário de Fechamento</label>
+                        <input type="time" id="closing-time-setting">
+                    </div>
+                    <div class="form-group">
+                        <label>Dias de Funcionamento</label>
+                        <div id="working-days-grid" class="working-days-grid">
+                            <!-- Days will be loaded here by JS -->
+                        </div>
+                    </div>
+
+                    <h3>Opções de Pedido</h3>
+                    <div class="form-group checkbox-group">
+                        <input type="checkbox" id="enable-delivery-setting">
+                        <label for="enable-delivery-setting">Habilitar Entrega</label>
+                    </div>
+                    <div class="form-group">
+                        <label for="delivery-fee-setting">Taxa de Entrega (R$)</label>
+                        <input type="number" id="delivery-fee-setting" step="0.01" min="0">
+                    </div>
+                    <div class="form-group checkbox-group">
+                        <input type="checkbox" id="enable-pickup-setting">
+                        <label for="enable-pickup-setting">Habilitar Retirada no Local</label>
+                    </div>
+                    <div class="form-group checkbox-group">
+                        <input type="checkbox" id="enable-table-order-setting">
+                        <label for="enable-table-order-setting">Habilitar Pedido na Mesa</label>
+                    </div>
+
+                    <h3>Tempos Estimados</h3>
+                    <div class="form-group">
+                        <label for="estimated-pickup-time-setting">Tempo Estimado para Retirada</label>
+                        <input type="text" id="estimated-pickup-time-setting" placeholder="Ex: 15-20 minutos">
+                    </div>
+                    <div class="form-group">
+                        <label for="estimated-delivery-time-setting">Tempo Estimado para Entrega</label>
+                        <input type="text" id="estimated-delivery-time-setting" placeholder="Ex: 30-45 minutos">
+                    </div>
+
+                    <h3>Pagamento</h3>
+                    <div class="form-group">
+                        <label for="pix-key-setting">Chave PIX</label>
+                        <input type="text" id="pix-key-setting">
+                    </div>
+
+                    <h3>Personalização Visual</h3>
+                    <div class="form-group">
+                        <label for="header-color-start-setting">Cor Inicial do Cabeçalho</label>
+                        <input type="color" id="header-color-start-setting">
+                    </div>
+                    <div class="form-group">
+                        <label for="header-color-end-setting">Cor Final do Cabeçalho</label>
+                        <input type="color" id="header-color-end-setting">
+                    </div>
+                    <div class="form-group">
+                        <label for="background-color-setting">Cor de Fundo</label>
+                        <input type="color" id="background-color-setting">
+                    </div>
+
+                    <h3>Automação</h3>
+                    <div class="form-group checkbox-group">
+                        <input type="checkbox" id="auto-print-orders-setting">
+                        <label for="auto-print-orders-setting">Imprimir Pedidos Automaticamente</label>
+                    </div>
+
+                    <button type="submit" class="btn-primary">Salvar Configurações</button>
+                </form>
+            </section>
+        </main>
+    </div>
+
+    <!-- Product Modal -->
+    <div id="product-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="product-modal-title">Adicionar Produto</h2>
+            <form id="product-form">
+                <input type="hidden" id="product-id">
+                <div class="form-group">
+                    <label for="product-name">Nome do Produto</label>
+                    <input type="text" id="product-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="product-description">Descrição</label>
+                    <textarea id="product-description"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="product-price">Preço (R$)</label>
+                    <input type="number" id="product-price" step="0.01" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="product-category">Categoria</label>
+                    <select id="product-category" required>
+                        <!-- Options will be loaded by JS -->
+                    </select>
+                </div>
+                <div class="form-group checkbox-group">
+                    <input type="checkbox" id="product-has-image">
+                    <label for="product-has-image">Produto tem imagem?</label>
+                </div>
+                <div class="form-group" id="product-image-group" style="display: none;">
+                    <label for="product-image">URL da Imagem</label>
+                    <input type="url" id="product-image">
+                </div>
+                <div class="form-group checkbox-group">
+                    <input type="checkbox" id="product-has-addons">
+                    <label for="product-has-addons">Produto tem acréscimos?</label>
+                </div>
+                <div class="form-group checkbox-group">
+                    <input type="checkbox" id="product-active">
+                    <label for="product-active">Ativo</label>
+                </div>
+                <button type="submit" class="btn-primary">Salvar Produto</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Category Modal -->
+    <div id="category-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="category-modal-title">Adicionar Categoria</h2>
+            <form id="category-form">
+                <input type="hidden" id="category-id">
+                <div class="form-group">
+                    <label for="category-name">Nome da Categoria</label>
+                    <input type="text" id="category-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="category-description">Descrição</label>
+                    <textarea id="category-description"></textarea>
+                </div>
+                <div class="form-group checkbox-group">
+                    <input type="checkbox" id="category-active">
+                    <label for="category-active">Ativa</label>
+                </div>
+                <button type="submit" class="btn-primary">Salvar Categoria</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Addon Modal -->
+    <div id="addon-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="addon-modal-title">Adicionar Acréscimo</h2>
+            <form id="addon-form">
+                <input type="hidden" id="addon-id">
+                <div class="form-group">
+                    <label for="addon-name">Nome do Acréscimo</label>
+                    <input type="text" id="addon-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="addon-price">Preço (R$)</label>
+                    <input type="number" id="addon-price" step="0.01" min="0" required>
+                </div>
+                <div class="form-group checkbox-group">
+                    <input type="checkbox" id="addon-active">
+                    <label for="addon-active">Ativo</label>
+                </div>
+                <button type="submit" class="btn-primary">Salvar Acréscimo</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="tenant-resolver.js"></script>
+    <script src="admin-updated.js"></script>
+</body>
+</html>
